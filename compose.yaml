@@ -1,5 +1,17 @@
 
 services:
+  web:
+    build: .
+    # env_file: ./.env
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - database
+    networks:
+      - app-network
+
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
@@ -14,6 +26,12 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
+    networks:
+      - app-network
 
 volumes:
   database_data:
+
+networks:
+  app-network:
+    driver: bridge
