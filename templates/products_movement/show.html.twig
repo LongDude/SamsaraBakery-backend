@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ProductsMovement{% endblock %}
+
+{% block body %}
+    <h1>ProductsMovement</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ products_movement.id }}</td>
+            </tr>
+            <tr>
+                <th>Realised_price</th>
+                <td>{{ products_movement.realisedPrice }}</td>
+            </tr>
+            <tr>
+                <th>Realised_count</th>
+                <td>{{ products_movement.realisedCount }}</td>
+            </tr>
+            <tr>
+                <th>Recieved_cost</th>
+                <td>{{ products_movement.recievedCost }}</td>
+            </tr>
+            <tr>
+                <th>Recieved_count</th>
+                <td>{{ products_movement.recievedCount }}</td>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <td>{{ products_movement.date ? products_movement.date|date('Y-m-d') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_products_movement_index') }}">back to list</a>
+
+    <a href="{{ path('app_products_movement_edit', {'id': products_movement.id}) }}">edit</a>
+
+    {{ include('products_movement/_delete_form.html.twig') }}
+{% endblock %}

@@ -1,0 +1,44 @@
+ROLES:
+- Store Manager
+- Partner
+- Logist
+- Director
+- Production Manager
+
+TABLES:
+- Affiliates
+    + Entries
+- Products
+    + Entries
+- Assortiment
+- Products Movement
+- Production Plan
+- Ingredients
+- Orders
+- Deliviries
+- Partners
+    + Entries
+- Users
+
+
+SPECS:
+- Procedure:
+- Trigger 1: 
+- Trigger 2: 
+
+REPORTS:
+
+
+LOADING CSV:
+
+PLAN:
+- ER diagramm
+- Create entityes
+- Create Triggers and procedures (in migrations)
+- Create fill scripts (in migrations)
+- Check DB with pgadmin (use deploy script)
+- Create controllers for auth (with all roles)
+- Basic personal cabinet
+- Tables for all presenters
+- Reports and importing csv
+- Report and Power Designer tables
