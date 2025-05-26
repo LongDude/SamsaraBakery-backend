@@ -1,0 +1,82 @@
+{% import "components/table/_base.html.twig" as base_table %}
+
+{# Add Product Modal #}
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить продукт</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Количество</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productionCost" class="form-label">Себестоимость</label>
+                        <input type="number" class="form-control" id="productionCost" name="productionCost" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveProduct">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Table Container #}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Управление продуктами</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="fas fa-plus"></i> Добавить продукт
+    </button>
+</div>
+
+{% set config = {
+        'columns': [
+            {
+                'field': 'name',
+                'label': 'Название',
+                'sortable': true,
+                'editable': true,
+                'type': 'text'
+            },
+            {
+                'field': 'quantityStoraged',
+                'label': 'Количество',
+                'sortable': true,
+                'editable': true,
+                'type': 'number'
+            },
+            {
+                'field': 'productionCost',
+                'label': 'Себестоимость',
+                'sortable': true,
+                'editable': true,
+                'type': 'number'
+            }
+        ],
+        'actions': [
+            {
+                'name': 'delete',
+                'icon': 'trash',
+                'type': 'danger'
+            }
+        ],
+        'search_endpoint': '/api/products/search',
+        'pagination': {
+            'current_page': current_page|default(1),
+            'total_pages': total_pages|default(1)
+        },
+    'items': products
+} %}
+
+{{ base_table.render_table(config) }} 

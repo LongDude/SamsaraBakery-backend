@@ -2,13 +2,255 @@
 
 {% block title %}Пекарня "Колесо самсары"!{% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 0px;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover: #34495e;
+        }
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-</div>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            max-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed .logo {
+            max-width: 40px;
+        }
+
+        .user-card {
+            padding: 1rem;
+            margin: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .nav-section {
+            margin: 1rem 0;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .nav-link {
+            padding: 0.8rem 1rem;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-section-title {
+            display: none;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .toggle-sidebar {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            border: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <button class="toggle-sidebar" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ asset('images/logo.png') }}" alt="Колесо самсары" class="logo">
+        </div>
+
+        <div class="user-card">
+            <div class="user-info">
+                <h5>{{ app.user.username|default('Гость') }}</h5>
+                <p class="text-muted">{{ app.user.email|default('') }}</p>
+                <p class="text-muted">{{ app.user.phone|default('') }}</p>
+                <p class="text-muted">{{ app.user.address|default('') }}</p>
+            </div>
+        </div>
+
+        <nav class="nav-sections">
+            {% if is_granted('ROLE_USER') %}
+                <div class="nav-section">
+                    <div class="nav-section-title">Общее</div>
+                    <a href="/user/{{ app.user.id }}/edit" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>Профиль</span>
+                    </a>
+                    <a href="/logout" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Выйти</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Пользователь</div>
+                    <a href="#" class="nav-link" data-table="user_view_products">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Продукты</span>
+                    </a>
+                </div>
+            {% else %}
+                <div class="nav-section">
+                    <div class="nav-section-title">Авторизация</div>
+                    <a href="/login" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Войти</span>
+                    </a>
+                    <a href="/register" class="nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Регистрация</span>
+                    </a>
+                </div>
+            {% endif %}
+
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="nav-section">
+                    <div class="nav-section-title">Админ-панель</div>
+                    <a href="/affiliates" class="nav-link">
+                        <i class="fas fa-store"></i>
+                        <span>Филиалы</span>
+                    </a>
+                    <a href="/assortiment" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ассортимент</span>
+                    </a>
+                    <a href="/product-movement" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Движение продукции</span>
+                    </a>
+                    <a href="#" class="nav-link" data-table="admin_view_products">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Продукты</span>
+                    </a>
+                    <a href="/ingredients" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ингредиенты</span>
+                    </a>
+                    <a href="/ingredient-products" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ингредиенты продуктов</span>
+                    </a>
+                    <a href="/deliveries" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Поставки</span>
+                    </a>
+                    <a href="/suppliers" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Поставщики</span>
+                    </a>
+                    <a href="/supplier-representatives" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Представители поставщиков</span>
+                    </a>
+                    <a href="/production-plan" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Производственный план</span>
+                    </a>
+                    <a href="/orders" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="/partners" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Партнеры</span>
+                    </a>
+                    <a href="/partners-representatives" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Представители партнеров</span>
+                    </a>
+                    <a href="/users" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Пользователи</span>
+                    </a>
+                </div>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        <div class="container">
+            <h1>Добро пожаловать в "Колесо самсары"!</h1>
+            <div id="tableContainer"></div>
+        </div>
+    </main>
+
+    <script src="{{ asset('js/table.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+        });
+    </script>
 {% endblock %}

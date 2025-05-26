@@ -15,20 +15,20 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/products')]
 final class ProductsController extends AbstractController
 {
-    #[Route(name: 'app_products_user_index', methods: ['GET'])]
+    #[Route('/user-view', name: 'app_products_user_index', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
     public function user_index(ProductsRepository $productsRepository): Response
     {
-        
+        return $this->render('products/_index_user.html.twig', [
+            'products' => $productsRepository->findAll(),
+        ]);   
     }
-
-
 
 
     #[Route(name: 'app_products_index', methods: ['GET'])]
     public function index(ProductsRepository $productsRepository): Response
     {
-        return $this->render('products/index.html.twig', [
+        return $this->render('products/index_admin.html.twig', [
             'products' => $productsRepository->findAll(),
         ]);
     }
