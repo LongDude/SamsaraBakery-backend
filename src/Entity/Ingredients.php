@@ -27,9 +27,16 @@ class Ingredients
     #[ORM\OneToMany(targetEntity: Deliveries::class, mappedBy: 'ingredient')]
     private Collection $deliveries;
 
+    /**
+     * @var Collection<int, Products>
+     */
+    #[ORM\ManyToMany(targetEntity: Products::class, inversedBy: 'ingredients')]
+    private Collection $product;
+
     public function __construct()
     {
         $this->deliveries = new ArrayCollection();
+        $this->product = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -87,6 +94,30 @@ class Ingredients
                 $delivery->setIngredient(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Products>
+     */
+    public function getProduct(): Collection
+    {
+        return $this->product;
+    }
+
+    public function addProduct(Products $product): static
+    {
+        if (!$this->product->contains($product)) {
+            $this->product->add($product);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Products $product): static
+    {
+        $this->product->removeElement($product);
 
         return $this;
     }

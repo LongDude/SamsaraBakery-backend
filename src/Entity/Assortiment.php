@@ -26,6 +26,9 @@ class Assortiment
     #[ORM\Column]
     private ?int $daily_delivery = null;
 
+    #[ORM\ManyToOne(inversedBy: 'assortiments')]
+    private Affiliates $affiliate;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,18 @@ class Assortiment
     public function setDailyDelivery(int $daily_delivery): static
     {
         $this->daily_delivery = $daily_delivery;
+
+        return $this;
+    }
+
+    public function getAffiliate(): Affiliates
+    {
+        return $this->affiliate;
+    }
+
+    public function setAffiliate(Affiliates $affiliate): static
+    {
+        $this->affiliate = $affiliate;
 
         return $this;
     }

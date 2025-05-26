@@ -30,9 +30,16 @@ class Affiliates
     #[ORM\OneToMany(targetEntity: ProductsMovement::class, mappedBy: 'affiliate')]
     private Collection $productsMovements;
 
+    /**
+     * @var Collection<int, Assortiment>
+     */
+    #[ORM\OneToMany(targetEntity: Assortiment::class, mappedBy: 'affiliate')]
+    private Collection $assortiments;
+
     public function __construct()
     {
         $this->productsMovements = new ArrayCollection();
+        $this->assortiments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -100,6 +107,36 @@ class Affiliates
             // set the owning side to null (unless already changed)
             if ($productsMovement->getAffiliate() === $this) {
                 $productsMovement->setAffiliate(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Assortiment>
+     */
+    public function getAssortiments(): Collection
+    {
+        return $this->assortiments;
+    }
+
+    public function addAssortiment(Assortiment $assortiment): static
+    {
+        if (!$this->assortiments->contains($assortiment)) {
+            $this->assortiments->add($assortiment);
+            $assortiment->setAffiliate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAssortiment(Assortiment $assortiment): static
+    {
+        if ($this->assortiments->removeElement($assortiment)) {
+            // set the owning side to null (unless already changed)
+            if ($assortiment->getAffiliate() === $this) {
+                $assortiment->setAffiliate(null);
             }
         }
 

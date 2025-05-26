@@ -42,11 +42,18 @@ class Products
     #[ORM\Column]
     private ?int $quantity_storaged = null;
 
+    /**
+     * @var Collection<int, Ingredients>
+     */
+    #[ORM\ManyToMany(targetEntity: Ingredients::class, mappedBy: 'product')]
+    private Collection $ingredients;
+
     public function __construct()
     {
         $this->assortiments = new ArrayCollection();
         $this->productsMovements = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->ingredients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -176,6 +183,33 @@ class Products
     public function setQuantityStoraged(int $quantity_storaged): static
     {
         $this->quantity_storaged = $quantity_storaged;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ingredients>
+     */
+    public function getIngredients(): Collection
+    {
+        return $this->ingredients;
+    }
+
+    public function addIngredient(Ingredients $ingredient): static
+    {
+        if (!$this->ingredients->contains($ingredient)) {
+            $this->ingredients->add($ingredient);
+            $ingredient->addProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIngredient(Ingredients $ingredient): static
+    {
+        if ($this->ingredients->removeElement($ingredient)) {
+            $ingredient->removeProduct($this);
+        }
 
         return $this;
     }

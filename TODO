@@ -1,44 +1,137 @@
-ROLES:
-- Store Manager
-- Partner
-- Logist
-- Director
-- Production Manager
+Пользователь:
+  - Просмотр списка продукции
+    - | Product | Price | quantity | 
+    - Read only
+    - Фильтрация по продукту
+    - Сортировка по всем полям
 
-TABLES:
-- Affiliates
-    + Entries
-- Products
-    + Entries
-- Assortiment
-- Products Movement
-- Production Plan
-- Ingredients
-- Orders
-- Deliviries
-- Partners
-    + Entries
-- Users
+Director Controller:
+  - Управление списком заказов
+    - | Partner firmname | product | price | quantity | Status
+    - Может удалить любую/на любой стадии
+    - Может изменить статус на "Принято"
+    - Может добавить сразу в статусе "Принято"
+    - Сортировка по всем полям
+    - Фильтрация по имени/продукту и статусу
+    - Генерация отчетов
+  - Управление филиалами
+    - | Affiliate name | address | contact number | Revenue | Manager |
+    - Выбор временного периода
+    - Вывод информации о филиале + Имя и номер менеджера + Чистая Выручка за период
+    - Добавление филиала/управление сотрудником на должности
+    - Генерация отчетов
+  - Добавление продукции
+    - |Product name|production cost|
+  - Отчет о продажах
+    - | Product name | Date | Revenue | Orders Revenue | Cost | Net revenue |Producted count | Sold count | Realisation index | 
+    - Фильтация по полю Product Name
+    - Выбор временного периода (фильтрация + период при отсутсвии флага)
+    - Сортировка по всем полям
+    - Флаг summary - удаляет Date для общего обзора периода
+    - генерация отчетов
+  - Сотрудники
+    - Измененеи ролей (ограниченное множество)
+    - Удаление
+    - Добавление
+  - Представители фирм
+    - | firmname | username |
+    - Добавление по имени пользователя/фирмы
+    - Фильтрация по имени фирмы/пользователя
+    - Удаление
+  - Представители поставщиков
+    - | firmname | username |
+    - Добавление по имени пользователя/фирмы
+    - Фильтрация по имени фирмы/пользователя
+    - Удаление
 
+Administrator:
+- Affiliates (swap manager id with user name)
+- Assortiment (swap affiliate and product with names)
+- Product Movement (swap affiliate and product with names)
+- Product
+- Ingredient
+- Ingredient Products (use names)
+- deliveries (Swap supplier with firm name)
+- Supplier
+- Supplier Representatives (swap user id with username, partner id with firmname)
+- Orders (swap product id, partner id  with product name, firmname)
+- partners 
+- partners representatives (swap user id with username, partner id with firmname)
+- Production plan (swap product_id with product name)
+- User 
+
+Production manager controller:
+- Управление ингредиентами
+  - | name | quantity |
+  - Может добавлять/редактировать записи
+- Управление рецептами
+  - | Product name | Ingredient | quantity on storage | quantity per recipe |
+  - CRUD
+  - Фильтрация по ингредиентами/продуктам
+  - Сортировка по всем полям
+- Управление продукцией
+  - | Product name | Productm count |
+  - Может изменить количество продукта
+- Управление производственным планом
+  - | Product name | date | quantity |
+  - Фильтрация по диапазону дат/продукту
+  - Сортировка по всем полям
+
+Affiliate manager controller:
+- Управление ассортиментом
+  - | Product name | quantity | price | daily delivery |
+  - Фильтрация по имени продукта
+  - Сортировка по всем полям
+  - Может полностью редактировать таблицу
+  - Может добавить только отсутствующий продукт
+- Управление движением товара
+  - | Product name | Date(always TODAY) | realised_count | recieved_count |
+  - Фильтрация по имени продукта
+  - Сортировка по всем полям
+  - Почти все перехватывается триггерами: добавление записи прибавляется к прошлой, стоимостная оценка считается автоматически
+  - Доступны только INSERT (POST)
+
+Logist controller:
+- Просмотр дневных поставок
+  - | Affilaite adress | contact number | product | quantity |
+  - Формируется путем исключения доставок assortiment_daily  из product_movement 
+  - Может отмечать заказ как доставленный (вызывает процедуру)
+- Просмотр заказов
+  - | Partner firmname | partner adress | contact number | product | quantity | Date | 
+  - Только записи с статусом IN_STORAGE/BEING_DELIEVERED
+  - Может менять статус заказа на BEING_DELIEVERED/DELIEVERED
+
+Partner controller:
+- Заказы
+  - Учитывает id партнера
+  - | Product | Date | quantity | Cost | Status |
+  - На стадии RECIEVED|PROCESSING может быть отменен\изменен
+  - Сортировка по всем полям
+  - Фильтрация по диапазону дат, имени продукта и статусу
+
+Supplier controller:
+- Доставки
+  - Учитывает id поставщика
+  - | Product | date | quantity | Cost |
+  - Сортировка по всем полям
+  - Фильтрация по диапазону дат, имени продукта
+
+ALIAS (json):
+- Product (id -> name)
+- Affiliate (id -> address)
+- Supplier (id -> firmname)
+- Partner (id -> firmname)
+- Ingridient (id -> name)
+- User (id -> name)
 
 SPECS:
-- Procedure:
-- Trigger 1: 
-- Trigger 2: 
-
-REPORTS:
-
-
-LOADING CSV:
-
-PLAN:
-- ER diagramm
-- Create entityes
-- Create Triggers and procedures (in migrations)
-- Create fill scripts (in migrations)
-- Check DB with pgadmin (use deploy script)
-- Create controllers for auth (with all roles)
-- Basic personal cabinet
-- Tables for all presenters
-- Reports and importing csv
-- Report and Power Designer tables
+Procedure:
+  - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
+  - Обновляет Product movenemt новой записью/обновление текущей
+  - Обновляет Assortiment данными (иначе процедура обваливается)
+Trigger 1: 
+  - Добавление продукта (склад)
+  - Автоматически вычитает количество ингридиентов со склада по рецепту
+Trigger 2: 
+  - Изменение товара (филиал)
+  - Автоматически обновляет ассортимент/стоимости для филиала

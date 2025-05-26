@@ -10,10 +10,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/products')]
 final class ProductsController extends AbstractController
 {
+    #[Route(name: 'app_products_user_index', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function user_index(ProductsRepository $productsRepository): Response
+    {
+        
+    }
+
+
+
+
     #[Route(name: 'app_products_index', methods: ['GET'])]
     public function index(ProductsRepository $productsRepository): Response
     {
