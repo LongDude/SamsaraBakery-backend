@@ -172,15 +172,15 @@
             {% if is_granted('ROLE_ADMIN') %}
                 <div class="nav-section">
                     <div class="nav-section-title">Админ-панель</div>
-                    <a href="/affiliates" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_affiliates">
                         <i class="fas fa-store"></i>
                         <span>Филиалы</span>
                     </a>
-                    <a href="/assortiment" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_assortiment">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ассортимент</span>
                     </a>
-                    <a href="/product-movement" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_product_movement">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Движение продукции</span>
                     </a>
@@ -188,43 +188,43 @@
                         <i class="fas fa-shopping-cart"></i>
                         <span>Продукты</span>
                     </a>
-                    <a href="/ingredients" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_ingredients">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ингредиенты</span>
                     </a>
-                    <a href="/ingredient-products" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_ingredient_products">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ингредиенты продуктов</span>
                     </a>
-                    <a href="/deliveries" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_deliveries">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Поставки</span>
                     </a>
-                    <a href="/suppliers" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_suppliers">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Поставщики</span>
                     </a>
-                    <a href="/supplier-representatives" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_supplier_representatives">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Представители поставщиков</span>
                     </a>
-                    <a href="/production-plan" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_production_plan">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Производственный план</span>
                     </a>
-                    <a href="/orders" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_orders">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Заказы</span>
                     </a>
-                    <a href="/partners" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_partners">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Партнеры</span>
                     </a>
-                    <a href="/partners-representatives" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_partners_representatives">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Представители партнеров</span>
                     </a>
-                    <a href="/users" class="nav-link">
+                    <a href="#" class="nav-link" data-table="admin_view_users">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Пользователи</span>
                     </a>
@@ -236,7 +236,12 @@
     <main class="main-content" id="mainContent">
         <div class="container">
             <h1>Добро пожаловать в "Колесо самсары"!</h1>
-            <div id="tableContainer"></div>
+            <div id="tableContainer">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Выберите раздел в меню слева для просмотра данных
+                </div>
+            </div>
         </div>
     </main>
 
@@ -250,6 +255,10 @@
             sidebarToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('collapsed');
                 mainContent.classList.toggle('expanded');
+            });
+
+            const tableManager = new TableManager({
+                apiEndpoint: '/api'
             });
         });
     </script>

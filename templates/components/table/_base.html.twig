@@ -1,5 +1,5 @@
 {% macro render_table(config) %}
-<div class="table-container">
+<div class="table-container" data-table-config='{{ config|json_encode|raw }}'>
     {# Search Section #}
     <div class="search-container mb-3">
         <input type="text" 
@@ -35,11 +35,7 @@
                             <td class="{{ column.editable ? 'editable' : '' }}" 
                                 data-field="{{ column.field }}"
                                 data-type="{{ column.type|default('text') }}">
-                                {% if column.field == 'productionCost' %}
-                                    {{ item.productionCost|number_format(2, '.', ' ') }}
-                                {% else %}
-                                    {{ attribute(item, column.field)|default('') }}
-                                {% endif %}
+                                {{ attribute(item, column.field)|default('') }}
                             </td>
                         {% endfor %}
                         {% if config.actions %}

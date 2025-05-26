@@ -1,11 +1,31 @@
 class TableManager {
-    constructor() {
-        this.currentTable = null;
+    constructor(config = {}) {
+        // Базовые настройки
+        this.config = {
+            tableType: config.tableType || '',
+            apiEndpoint: config.apiEndpoint || '/api',
+            searchEndpoint: config.searchEndpoint || '/api/search',
+            searchDelay: config.searchDelay || 300,
+            deleteConfirmMessage: config.deleteConfirmMessage || 'Вы уверены, что хотите удалить этот элемент?',
+            addModalId: config.addModalId || 'addItemModal',
+            addFormId: config.addFormId || 'addItemForm',
+            addButtonId: config.addButtonId || 'saveItem',
+            ...config
+        };
+
+        // Состояние таблицы
+        this.currentTable = this.config.tableType;
         this.currentPage = 1;
-        this.currentSort = null;
+        this.currentSort = {
+            field: null,
+            direction: 'ASC'
+        };
         this.currentSearch = '';
         this.searchTimeout = null;
         this.lastSearchValue = '';
+
+        // Инициализация при создании
+        this.initializeTableHandlers();
     }
 
     initNavigationHandlers() {
@@ -14,8 +34,48 @@ class TableManager {
                 e.preventDefault();
                 const tableType = link.dataset.table;
                 if (tableType) {
+                    // Обновляем конфигурацию для нового типа таблицы
+                    this.config.tableType = tableType;
+                    this.currentTable = tableType;
+                    
+                    // Загружаем таблицу
                     this.loadTable(tableType);
                 }
+            });
+        });
+    }
+
+    initSort() {
+        document.querySelectorAll('th.sortable').forEach(header => {
+            header.addEventListener('click', () => {
+                const field = header.dataset.sort;
+                if (!field) return;
+
+                // Определяем направление сортировки
+                if (this.currentSort.field === field) {
+                    this.currentSort.direction = this.currentSort.direction === 'ASC' ? 'DESC' : 'ASC';
+                } else {
+                    this.currentSort.field = field;
+                    this.currentSort.direction = 'ASC';
+                }
+
+                // Обновляем иконки сортировки
+                document.querySelectorAll('th.sortable i').forEach(icon => {
+                    icon.className = 'fas fa-sort';
+                });
+
+                const icon = header.querySelector('i');
+                if (icon) {
+                    icon.className = `fas fa-sort-${this.currentSort.direction === 'ASC' ? 'up' : 'down'}`;
+                }
+
+                // Загружаем таблицу с новой сортировкой
+                this.loadTable(
+                    this.currentTable,
+                    this.currentPage,
+                    this.currentSort,
+                    this.currentSearch
+                );
             });
         });
     }
@@ -23,18 +83,50 @@ class TableManager {
     loadTable(tableType, page = 1, sort = null, search = '') {
         this.currentTable = tableType;
         this.currentPage = page;
-        this.currentSort = sort;
+        
+        // Обновляем состояние сортировки
+        if (sort) {
+            this.currentSort = sort;
+        }
+        
         this.currentSearch = search;
 
-        const url = `/api/${tableType}?page=${page}&sort=${sort || ''}&search=${search}`;
+        // Формируем URL с параметрами сортировки
+        const params = new URLSearchParams({
+            page: page,
+            search: search
+        });
+
+        if (this.currentSort.field) {
+            params.append('sortfield', this.currentSort.field);
+            params.append('sortorder', this.currentSort.direction);
+        }
+
+        const url = `${this.config.apiEndpoint}/${tableType}?${params.toString()}`;
         
         fetch(url)
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('tableContainer').innerHTML = html;
-                this.initializeTableHandlers();
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
             })
-            .catch(error => console.error('Error loading table:', error));
+            .then(html => {
+                const tableContainer = document.getElementById('tableContainer');
+                if (tableContainer) {
+                    tableContainer.innerHTML = html;
+                    this.initializeTableHandlers();
+                } else {
+                    console.error('Table container not found');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading table:', error);
+                const tableContainer = document.getElementById('tableContainer');
+                if (tableContainer) {
+                    tableContainer.innerHTML = '<div class="alert alert-danger">Ошибка загрузки таблицы</div>';
+                }
+            });
     }
 
     initSearch() {
@@ -61,7 +153,7 @@ class TableManager {
                 }
 
                 this.searchTimeout = setTimeout(() => {
-                    const endpoint = searchInput.dataset.endpoint;
+                    const endpoint = searchInput.dataset.endpoint || this.config.searchEndpoint;
                     if (endpoint) {
                         fetch(`${endpoint}?q=${encodeURIComponent(searchValue)}`)
                             .then(response => response.json())
@@ -80,7 +172,7 @@ class TableManager {
                             })
                             .catch(error => console.error('Error fetching search results:', error));
                     }
-                }, parseInt(searchInput.dataset.delay));
+                }, this.config.searchDelay);
             });
 
             searchResults.addEventListener('click', (e) => {
@@ -127,7 +219,7 @@ class TableManager {
 
                 const saveEdit = () => {
                     const newValue = input.value;
-                    fetch(`/api/products/${id}/edit`, {
+                    fetch(`${this.config.apiEndpoint}/${this.currentTable}/${id}/edit`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -163,9 +255,9 @@ class TableManager {
     initDelete() {
         document.querySelectorAll('[data-action="delete"]').forEach(button => {
             button.addEventListener('click', () => {
-                if (confirm('Вы уверены, что хотите удалить этот продукт?')) {
+                if (confirm(this.config.deleteConfirmMessage)) {
                     const id = button.dataset.id;
-                    fetch(`/api/products/${id}`, {
+                    fetch(`${this.config.apiEndpoint}/${this.currentTable}/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
@@ -177,25 +269,33 @@ class TableManager {
                             button.closest('tr').remove();
                         }
                     })
-                    .catch(error => console.error('Error deleting product:', error));
+                    .catch(error => console.error('Error deleting item:', error));
                 }
             });
         });
     }
 
-    initAddProduct() {
-        const saveButton = document.getElementById('saveProduct');
+    initAddItem() {
+        const saveButton = document.getElementById(this.config.addButtonId);
         if (saveButton) {
             saveButton.addEventListener('click', () => {
-                const form = document.getElementById('addProductForm');
-                const formData = new FormData(form);
-                const data = {
-                    name: formData.get('name'),
-                    quantity: parseInt(formData.get('quantity')),
-                    productionCost: parseFloat(formData.get('productionCost'))
-                };
+                const form = document.getElementById(this.config.addFormId);
+                if (!form) return;
 
-                fetch('/api/products', {
+                const formData = new FormData(form);
+                const data = {};
+                
+                // Собираем все поля формы в объект
+                for (let [key, value] of formData.entries()) {
+                    // Пытаемся преобразовать числовые значения
+                    if (!isNaN(value) && value.trim() !== '') {
+                        data[key] = Number(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+
+                fetch(`${this.config.apiEndpoint}/${this.currentTable}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -205,13 +305,13 @@ class TableManager {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
+                        const modal = bootstrap.Modal.getInstance(document.getElementById(this.config.addModalId));
                         modal.hide();
                         form.reset();
                         this.loadTable(this.currentTable);
                     }
                 })
-                .catch(error => console.error('Error adding product:', error));
+                .catch(error => console.error('Error adding item:', error));
             });
         }
     }
@@ -232,13 +332,36 @@ class TableManager {
         this.initSearch();
         this.initInlineEdit();
         this.initDelete();
-        this.initAddProduct();
+        this.initAddItem();
         this.initPagination();
+        this.initSort();
     }
 }
 
-// Initialize table manager when DOM is loaded
+// Инициализация всех таблиц на странице
 document.addEventListener('DOMContentLoaded', () => {
-    const tableManager = new TableManager();
-    tableManager.initNavigationHandlers();
-}); 
+    // Создаем основной экземпляр TableManager
+    const mainTableManager = new TableManager({
+        tableType: 'products', // значение по умолчанию
+        apiEndpoint: '/api'
+    });
+
+    // Инициализируем обработчики навигации
+    mainTableManager.initNavigationHandlers();
+
+    // Находим все контейнеры таблиц
+    document.querySelectorAll('.table-container').forEach(container => {
+        try {
+            // Получаем конфигурацию из data-атрибута
+            const config = JSON.parse(container.dataset.tableConfig || '{}');
+            
+            // Создаем экземпляр TableManager для каждой таблицы
+            const tableManager = new TableManager(config);
+            
+            // Инициализируем обработчики навигации
+            tableManager.initNavigationHandlers();
+        } catch (error) {
+            console.error('Error initializing table:', error);
+        }
+    });
+});
