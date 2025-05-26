@@ -229,7 +229,28 @@
                         <span>Пользователи</span>
                     </a>
                 </div>
+            {% elseif is_granted('ROLE_DIRECTOR') %}
+                <div class="nav-section">
+                    <div class="nav-section-title">Директор</div>
+                    <a href="#" class="nav-link" data-table="director_order_list">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Управление заказами</span>
+                    </a>
+                    <a href="#" class="nav-link" data-table="director_affiliates">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Управление филиалами</span>
+                    </a>
+                    <a href="#" class="nav-link" data-table="director_production">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Добавление продукции</span>
+                    </a>
+                    <a href="#" class="nav-link" data-table="director_production_report">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Отчет о продажах</span>
+                    </a>
+                </div>
             {% endif %}
+
         </nav>
     </aside>
 
@@ -244,22 +265,4 @@
             </div>
         </div>
     </main>
-
-    <script src="{{ asset('js/table.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('expanded');
-            });
-
-            const tableManager = new TableManager({
-                apiEndpoint: '/api'
-            });
-        });
-    </script>
 {% endblock %}
