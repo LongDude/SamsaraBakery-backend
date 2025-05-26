@@ -1,0 +1,111 @@
+{% import "components/table/_base.html.twig" as base_table %}
+
+{# Add Affiliate Modal #}
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить филиал</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm">
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Адрес</label>
+                        <input type="text" class="form-control" id="address" name="address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contactNumber" class="form-label">Контактный номер</label>
+                        <input type="text" class="form-control" id="contactNumber" name="contactNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="manager" class="form-label">Менеджер</label>
+                        <div class="search-wrapper">
+                            <input type="text" class="form-control search-input" id="manager" name="manager" data-field="manager" data-endpoint="/api/admin_view_affiliates/search_manager" required>
+                            <div class="search-results d-none"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveItem">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Table Container #}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Управление филиалами</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+        <i class="fas fa-plus"></i> Добавить филиал
+    </button>
+</div>
+
+{% set config = {
+        'columns': [
+            {
+                'field': 'address',
+                'label': 'Адрес',
+                'sortable': true,
+                'editable': true,
+                'type': 'text'
+            },
+            {
+                'field': 'contactNumber',
+                'label': 'Контактный номер',
+                'sortable': true,
+                'editable': true,
+                'type': 'text'
+            },
+            {
+                'field': 'manager',
+                'label': 'Менеджер',
+                'sortable': true,
+                'editable': true,
+                'type': 'text',
+                'searchable': true,
+                'value': 'manager.username'
+            }
+        ],
+        'actions': [
+            {
+                'name': 'delete',
+                'icon': 'trash',
+                'type': 'danger'
+            }
+        ],
+        'search_endpoint': '/api/admin_view_affiliates/search',
+        'pagination': {
+            'current_page': current_page|default(1),
+            'total_pages': total_pages|default(1)
+        },
+        'items': affiliates,
+        'tableType': 'admin_view_affiliates',
+        'apiEndpoint': '/api',
+        'addModalId': 'addItemModal',
+        'addFormId': 'addItemForm',
+        'addButtonId': 'saveItem'
+} %}
+
+{{ base_table.render_table(config) }}
+
+{# Инициализация TableManager #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tableConfig = {
+        tableType: 'admin_view_affiliates',
+        apiEndpoint: '/api',
+        searchEndpoint: '{{ config.search_endpoint }}',
+        searchDelay: 300,
+        deleteConfirmMessage: 'Вы уверены, что хотите удалить этот филиал?',
+        columns: {{ config.columns|json_encode|raw }},
+        actions: {{ config.actions|json_encode|raw }},
+        pagination: {{ config.pagination|json_encode|raw }}
+    };
+
+    const tableManager = new TableManager(tableConfig);
+    tableManager.initNavigationHandlers();
+});
+</script>
