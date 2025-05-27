@@ -150,7 +150,7 @@
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Пользователь</div>
-                    <a href="#" class="nav-link" data-table="user_view_products">
+                    <a href="#" class="nav-link dynamic-table" data-table="user_view_products">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Продукты</span>
                     </a>
@@ -172,79 +172,79 @@
             {% if is_granted('ROLE_ADMIN') %}
                 <div class="nav-section">
                     <div class="nav-section-title">Админ-панель</div>
-                    <a href="#" class="nav-link" data-table="admin_view_affiliates">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_affiliates">
                         <i class="fas fa-store"></i>
                         <span>Филиалы</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_assortiment">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_assortiment">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ассортимент</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_product_movement">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_product_movement">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Движение продукции</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_products">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_products">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Продукты</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_ingredients">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_ingredients">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ингредиенты</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_ingredient_products">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_ingredient_products">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ингредиенты продуктов</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_deliveries">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_deliveries">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Поставки</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_suppliers">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_suppliers">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Поставщики</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_supplier_representatives">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_supplier_representatives">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Представители поставщиков</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_production_plan">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_production_plan">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Производственный план</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_orders">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_orders">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Заказы</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_partners">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_partners">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Партнеры</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_partners_representatives">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_partners_representatives">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Представители партнеров</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="admin_view_users">
+                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_users">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Пользователи</span>
                     </a>
                 </div>
             {% elseif is_granted('ROLE_DIRECTOR') %}
                 <div class="nav-section">
-                    <div class="nav-section-title">Директор</div>
-                    <a href="#" class="nav-link" data-table="director_order_list">
+                    <div class="nav-section-title ">Директор</div>
+                    <a href="#" class="nav-link dynamic-table" data-table="director_order_list">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Управление заказами</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="director_affiliates">
+                    <a href="#" class="nav-link dynamic-table" data-table="director_affiliates">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Управление филиалами</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="director_production">
+                    <a href="#" class="nav-link dynamic-table" data-table="director_production">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Добавление продукции</span>
                     </a>
-                    <a href="#" class="nav-link" data-table="director_production_report">
+                    <a href="#" class="nav-link dynamic-table" data-table="director_production_report">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Отчет о продажах</span>
                     </a>
@@ -265,4 +265,43 @@
             </div>
         </div>
     </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableContainer = document.getElementById('tableContainer');
+        
+        // Handle nav-section link selection
+        document.querySelectorAll('.dynamic-table').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tableName = this.getAttribute('data-table');
+                
+                // Show loading state
+                tableContainer.innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Load table content
+                fetch(`/${tableName}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        tableContainer.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading table:', error);
+                        tableContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+                            </div>
+                        `;
+                    });
+            });
+        });
+    });
+    </script>
 {% endblock %}

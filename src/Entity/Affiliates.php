@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AffiliatesRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_ADDRESS', fields: ['address'])]
 class Affiliates
 {
     #[ORM\Id]
@@ -133,13 +134,7 @@ class Affiliates
 
     public function removeAssortiment(Assortiment $assortiment): static
     {
-        if ($this->assortiments->removeElement($assortiment)) {
-            // set the owning side to null (unless already changed)
-            if ($assortiment->getAffiliate() === $this) {
-                $assortiment->setAffiliate(null);
-            }
-        }
-
+        $this->assortiments->removeElement($assortiment);
         return $this;
     }
 }

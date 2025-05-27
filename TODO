@@ -15,7 +15,7 @@ Director Controller:
     - Фильтрация по имени/продукту и статусу
     - Генерация отчетов
 !  - Управление филиалами
-    - | Affiliate name | address | contact number | Revenue | Manager |
+    - | Affiliate address | contact number | Revenue | Manager |
     - Выбор временного периода
     - Вывод информации о филиале + Имя и номер менеджера + Чистая Выручка за период
     - Добавление филиала/управление сотрудником на должности
@@ -59,6 +59,26 @@ Administrator:
 - partners representatives (swap user id with username, partner id with firmname)
 - Production plan (swap product_id with product name)
 - User 
+
+AdminAffiliatesController               admin_view_affiliates
+AdminAssortimentController              admin_view_assortiment
+AdminProductMovementController          admin_view_product_movement
+AdminProductsController                 admin_view_products
+AdminIngredientsController              admin_view_ingredients
+AdminIngredientProductsController       admin_view_ingredient_products
+AdminDeliveriesController               admin_view_deliveries
+AdminSuppliersController                admin_view_suppliers
+AdminSupplierRepresentativesController  admin_view_supplier_representatives
+AdminProductionPlanController           admin_view_production_plan
+AdminOrdersController                   admin_view_orders
+AdminPartnersController                 admin_view_partners
+AdminPartnerRepresentatinvesController  admin_view_partners_representatives
+AdminUsersController                    admin_view_users
+
+DirectorOrdersController            director_orders
+DirectorAffiliatesController        director_affiliates
+DirectorProductionController        director_production
+DirectorProductionReportController  director_production_report
 
 Production manager controller:
 - Управление ингредиентами
