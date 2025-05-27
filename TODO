@@ -54,7 +54,6 @@ Administrator:
 - Orders (swap product id, partner id  with product name, firmname)
 - partners representatives (swap user id with username, partner id with firmname)
 - Production plan (swap product_id with product name)
-- User 
 
 - AdminAffiliatesController               admin_view_affiliates
 - AdminAssortimentController              admin_view_assortiment
@@ -65,7 +64,6 @@ Administrator:
 - AdminProductionPlanController           admin_view_production_plan
 - AdminOrdersController                   admin_view_orders
 - AdminPartnerRepresentatinvesController  admin_view_partners_representatives
-- AdminUsersController                    admin_view_users
 
 - DirectorOrdersController            director_orders
 - DirectorAffiliatesController        director_affiliates
@@ -142,10 +140,7 @@ Trigger 2:
 
 LIST:
 - Basic tables for admin (key entityes)
-- User roles checkbox
 - Fixtures (normal)
 - Expretiment with linked entityes
 - Search-selection field
-- Password display unconsistent
-- Roles on user not working properly
 - Others

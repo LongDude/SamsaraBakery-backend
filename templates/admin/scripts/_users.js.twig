@@ -3,7 +3,25 @@
   const trashIcon = `<i class="bi bi-trash"></i>`;
   const editIcon = `<i class="bi bi-pencil-square"></i>`;
 
+  const allRoles = [
+    { value: 'ROLE_ADMIN', text: 'Администратор' },
+    { value: 'ROLE_AFFILIATE_MANAGER', text: 'Менеджер филиала' },
+    { value: 'ROLE_DIRECTOR', text: 'Директор' },
+    { value: 'ROLE_SUPPLIER_REPRESENTATIVE', text: 'Представитель поставщика' },
+    { value: 'ROLE_PARTNER_REPRESENTATIVE', text: 'Представитель партнера' },
+    { value: 'ROLE_LOGIST', text: 'Логист' },
+    { value: 'ROLE_PRODUCTION_MANAGER', text: 'Менеджер производства' }
+  ];
+
+  function editableRolesFormatter(value, row, index) {
+    const display = value.map(role => allRoles.find(r => r.value === role)?.text).join(', ');
+    return `<span class="editable-roles-span" data-roles='${JSON.stringify(value)}' style="cursor:pointer;">${display}${penIcon}</span>`;
+  }
+
   function editableFormatter(value, row, index, field) {
+    if (field === 'password') {
+      value = '********';
+    }
     return `<span class="editable-span" data-field="${field}" style="cursor:pointer;">${value}${penIcon}</span>`;
   }
 
@@ -62,9 +80,7 @@
           field: 'roles',
           title: 'Роли',
           sortable: true,
-          formatter: function(value, row, index) {
-            return editableFormatter(value, row, index, 'roles');
-          }
+          formatter: editableRolesFormatter
         },
         {
           field: 'actions',
@@ -98,16 +114,13 @@
       }
     });
 
-    $(document).ready(function() {
-        $('#item-roles').multiselect({
-          includeSelectAllOption: true,
-          buttonWidth: '100%',
-          nonSelectedText: 'Выберите роли',
-          allSelectedText: 'Все выбраны',
-          nSelectedText: 'выбрано',
-          numberDisplayed: 2
-        });
-      });
+    $('#item-roles').select2({
+      width: '100%',
+      placeholder: 'Выберите роли',
+      allowClear: true,
+      closeOnSelect: false, // чтобы не закрывалось после каждого выбора
+      dropdownParent: $('#itemModal') // если select внутри модального окна
+    });
 
     // Кнопка "Добавить товар"
     const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
@@ -117,7 +130,8 @@
       $('#item-email').val('');
       $('#item-username').val('');
       $('#item-phone').val('');
-      $('#item-roles').multiselect('refresh');
+      $('#item-roles').val([]).trigger('change');
+      $('#item-plain-password').attr('required', true);
       itemModal.show();
     });
 
@@ -131,9 +145,45 @@
       $('#item-email').val(row.email);
       $('#item-username').val(row.username);
       $('#item-phone').val(row.phone);
-      $('#item-roles').multiselect('refresh');
+      $('#item-roles').val(row.roles).trigger('change');
+      $('#item-plain-password').removeAttr('required');
       itemModal.show();
     });
+
+    // Редактирование ролей
+    $(document).on('click', '.editable-roles-span', function() {
+      const $span = $(this);
+      const $tr = $span.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const currentRoles = rowData.roles || [];
+    
+      // Формируем select с опциями
+      let selectHtml = `<select class="form-control editable-roles-select" multiple style="width: 200px;">`;
+      allRoles.forEach(role => {
+        const selected = currentRoles.includes(role.value) ? 'selected' : '';
+        selectHtml += `<option value="${role.value}" ${selected}>${role.text}</option>`;
+      });
+      selectHtml += `</select>`;
+    
+      $span.replaceWith(selectHtml);
+    
+    const $select = $('.editable-roles-select');
+    $select.select2({
+      width: '200px',
+      dropdownParent: $tr // чтобы dropdown был внутри строки
+    }).select2('open'); // сразу открываем выпадающий список
+
+    $select.on('select2:close', function() {
+      saveRolesEdit($(this));
+    });
+    $select.on('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $(this).blur();
+      }
+    });
+  });
 
     // Сохранить (добавить или обновить)
     $('#item-form').on('submit', function(e) {
@@ -143,7 +193,7 @@
         email: $('#item-email').val(),
         username: $('#item-username').val(),
         phone: $('#item-phone').val(),
-        roles: $('#item-roles').multiselect('getSelecteds')
+        roles: $('#item-roles').select2('val')
       };
       let url, type;
       if (id) {
@@ -189,10 +239,14 @@
     // Оставляем инлайн-редактирование, если нужно
     $(document).on('click', '.editable-span', function() {
       const $span = $(this);
-      const value = $span.text().replace(/[\u{1F58A}-\u{1F58C}]|<svg[\s\S]*?<\/svg>/gu, '').trim();
+      let value = $span.text().replace(/[\u{1F58A}-\u{1F58C}]|<svg[\s\S]*?<\/svg>/gu, '').trim();
       const field = $span.data('field');
       let inputType = 'text';
       let step = '';
+      if (field === 'password') {
+        inputType = 'password';
+        value = '';
+      }
       $span.replaceWith(
         `<input type="${inputType}" class="form-control editable-input" data-field="${field}" value="${value}" ${step} style="width: 100%; display:inline;">`
       );
@@ -218,6 +272,12 @@
       const userId = rowData.id;
       const url = `{{ path('api_admin_users_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', userId);
 
+      // Отменяем изменение пароля, если он не соответствует шаблону
+      if (field === 'password' && (newValue === '' || /^\*+$/g.test(newValue)) ) {
+        $input.replaceWith(editableFormatter('********', rowData, rowIndex, field));
+        return;
+      }
+
       let data = {};
       data[field] = newValue;
 
@@ -235,6 +295,34 @@
       });
 
       $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
+    }
+
+    function saveRolesEdit($select) {
+      const newRoles = $select.val() || [];
+      const $tr = $select.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const userId = rowData.id;
+      const url = `{{ path('api_admin_users_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', userId);
+    
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({ roles: newRoles }),
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при обновлении ролей!');
+        }
+      });
+    
+      // Возвращаем span с обновлёнными ролями
+      const display = (newRoles || []).map(role => allRoles.find(r => r.value === role)?.text).join(', ');
+      $select.replaceWith(
+        `<span class="editable-roles-span" data-roles='${JSON.stringify(newRoles)}' style="cursor:pointer;">${display}${penIcon}</span>`
+      );
     }
   });
 })();

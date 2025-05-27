@@ -45,10 +45,12 @@ class AdminUsersController extends AbstractController
         $data = array_map(function($user) {
             return [
                 'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'username' => $user->getUsername(),
-                'phone' => $user->getPhone(),
-                'roles' => $user->getRoles(),
+                'email' => $user->getEmail() ?? '',
+                'username' => $user->getUsername() ?? '',
+                'phone' => $user->getPhone() ?? '',
+                'roles' => array_filter($user->getRoles(), function($role) {
+                    return $role !== 'ROLE_USER';
+                }),
                 'password' => '********'
             ];
         }, $users);
@@ -99,7 +101,7 @@ class AdminUsersController extends AbstractController
         if (isset($data['phone'])) {
             $user->setPhone($data['phone']);
         }
-        if (isset($data['password'])) {
+        if (!empty($data['password']) &&  !preg_match('/^\*+$/', $data['password'])) {
             $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
         }
         if (isset($data['roles'])) {
