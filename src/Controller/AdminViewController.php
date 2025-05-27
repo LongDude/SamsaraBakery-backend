@@ -7,24 +7,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[Route('/tables/admin', name: 'admin_table_')]
+#[IsGranted('ROLE_ADMIN')]
 class AdminViewController extends AbstractController
 {
-    #[Route('/admin_view_products', name: 'admin_view_products')]
-    public function adminViewProducts(Request $request, ProductsRepository $productsRepository): Response
+    #[Route('/products', name: 'products')]
+    public function adminViewProducts(): Response
     {
-        $page = $request->query->getInt('page', 1);
-        $limit = $request->query->getInt('limit', 10);
-        $offset = ($page - 1) * $limit;
+        return $this->render('admin/tables/_products.html.twig', []);
+    }
 
-        $products = $productsRepository->findBy([], [], $limit, $offset);
-        $totalProducts = $productsRepository->count([]);
-        $totalPages = ceil($totalProducts / $limit);
-
-        return $this->render('admin/_products.html.twig', [
-            'products' => $products,
-            'current_page' => $page,
-            'total_pages' => $totalPages,
-        ]);
+    #[Route('/products/js', name: 'products_js')]
+    public function adminViewProductsJs(): Response
+    {
+        $response = $this->render('admin/scripts/_products.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
     }
 } 

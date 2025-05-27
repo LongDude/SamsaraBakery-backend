@@ -16,7 +16,8 @@ final class MainController extends AbstractController
             'controller_name' => 'MainController',
         ]);
     }
-    #[Route('/test', name: 'app_main')]
+
+    #[Route('/test', name: 'app_test')]
     public function testpage(ProductsRepository $productsRepository): Response
     {
         $products = $productsRepository->findAll();

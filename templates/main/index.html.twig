@@ -5,115 +5,11 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --sidebar-width: 280px;
-            --sidebar-collapsed-width: 0px;
-            --sidebar-bg: #2c3e50;
-            --sidebar-text: #ecf0f1;
-            --sidebar-hover: #34495e;
-        }
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+{% endblock %}
 
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: var(--sidebar-width);
-            background: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .sidebar.collapsed {
-            width: var(--sidebar-collapsed-width);
-        }
-
-        .sidebar-header {
-            padding: 1rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .logo {
-            max-width: 150px;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar.collapsed .logo {
-            max-width: 40px;
-        }
-
-        .user-card {
-            padding: 1rem;
-            margin: 1rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-        }
-
-        .nav-section {
-            margin: 1rem 0;
-        }
-
-        .nav-section-title {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .nav-link {
-            padding: 0.8rem 1rem;
-            color: var(--sidebar-text);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            background: var(--sidebar-hover);
-            color: white;
-        }
-
-        .nav-link i {
-            width: 20px;
-            margin-right: 10px;
-        }
-
-        .sidebar.collapsed .nav-link span {
-            display: none;
-        }
-
-        .sidebar.collapsed .nav-section-title {
-            display: none;
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .main-content.expanded {
-            margin-left: var(--sidebar-collapsed-width);
-        }
-
-        .toggle-sidebar {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1001;
-            background: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            border: none;
-            padding: 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('js/tables/insertHTMLScripts.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -184,7 +80,7 @@
                         <i class="fas fa-shopping-cart"></i>
                         <span>Движение продукции</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_products">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_products' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Продукты</span>
                     </a>
@@ -274,7 +170,7 @@
         document.querySelectorAll('.dynamic-table').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-                const tableName = this.getAttribute('data-table');
+                const tableUrl = this.getAttribute('table-url');
                 
                 // Show loading state
                 tableContainer.innerHTML = `
@@ -286,10 +182,10 @@
                 `;
                 
                 // Load table content
-                fetch(`/${tableName}`)
+                fetch(`${tableUrl}`)
                     .then(response => response.text())
                     .then(html => {
-                        tableContainer.innerHTML = html;
+                        insertHtmlAndScripts(tableContainer, html)
                     })
                     .catch(error => {
                         console.error('Error loading table:', error);

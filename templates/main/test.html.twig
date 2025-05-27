@@ -1,18 +1,50 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Тестовая страница{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('js/tables/insertHTMLScripts.js') }}"></script>
+{% endblock %}
+
 
 {% block body %}
 <div class="container">
     <div class="row">
         <div class="col-12">
-            {% include 'admin/_products.html.twig' with {
-                products: products | default([]),
-                totalProducts: totalProducts | default(0),
-                totalPages: totalPages | default(0),
-                page: page | default(1),
-                limit: limit | default(10),
-            } %}
+            <div id="tableContainer"></div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableContainer = document.getElementById('tableContainer');
+        
+
+                {# Important: Change to test different tables #}
+                const tableUrl = '{{ path('admin_table_products') }}';
+                
+                // Show loading state
+                tableContainer.innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Load table content
+                fetch(`${tableUrl}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        insertHtmlAndScripts(tableContainer, html)
+                    })
+                    .catch(error => {
+                        console.error('Error loading table:', error);
+                        tableContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+                            </div>
+                        `;
+                    });
+            });
+    </script>
         </div>
     </div>
 </div>
