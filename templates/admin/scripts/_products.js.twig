@@ -1,3 +1,4 @@
+  (function() {
   const penIcon = `<i class="bi bi-pencil"></i>`;
   const trashIcon = `<i class="bi bi-trash"></i>`;
   const editIcon = `<i class="bi bi-pencil-square"></i>`;
@@ -59,7 +60,7 @@
         }
       ],
 
-      url: `{{ path('api_products_list') }}`,
+      url: `{{ path('api_admin_products_list') }}`,
       method: 'GET',
       contentType: 'application/json',
 
@@ -117,10 +118,10 @@
       };
       let url, type;
       if (id) {
-        url = `{{ path('api_products_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        url = `{{ path('api_admin_products_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
         type = 'PUT';
       } else {
-        url = `{{ path('api_products_create') }}`;
+        url = `{{ path('api_admin_products_create') }}`;
         type = 'POST';
       }
       $.ajax({
@@ -142,7 +143,7 @@
     $(document).on('click', '.delete-row', function() {
       if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
       const productId = $(this).data('id');
-      const url = `{{ path('api_products_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
+      const url = `{{ path('api_admin_products_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
 
       $.ajax({
         url: url,
@@ -190,7 +191,7 @@
       const rowIndex = $tr.data('index');
       const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
       const productId = rowData.id;
-      const url = `{{ path('api_products_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
+      const url = `{{ path('api_admin_products_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
 
       let data = {};
       data[field] = newValue;
@@ -211,3 +212,4 @@
       $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
     }
   });
+})();

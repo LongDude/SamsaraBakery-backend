@@ -17,6 +17,7 @@ final class MainController extends AbstractController
         ]);
     }
 
+
     #[Route('/test', name: 'app_test')]
     public function testpage(ProductsRepository $productsRepository): Response
     {

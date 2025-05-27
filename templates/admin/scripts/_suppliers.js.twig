@@ -1,3 +1,4 @@
+  (function() {
   const penIcon = `<i class="bi bi-pencil"></i>`;
   const trashIcon = `<i class="bi bi-trash"></i>`;
   const editIcon = `<i class="bi bi-pencil-square"></i>`;
@@ -59,7 +60,7 @@
         }
       ],
 
-      url: `{{ path('api_suppliers_list') }}`,
+      url: `{{ path('api_admin_suppliers_list') }}`,
       method: 'GET',
       contentType: 'application/json',
 
@@ -117,10 +118,10 @@
       };
       let url, type;
       if (id) {
-        url = `{{ path('api_suppliers_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        url = `{{ path('api_admin_suppliers_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
         type = 'PUT';
       } else {
-        url = `{{ path('api_suppliers_create') }}`;
+        url = `{{ path('api_admin_suppliers_create') }}`;
         type = 'POST';
       }
       $.ajax({
@@ -142,7 +143,7 @@
     $(document).on('click', '.delete-row', function() {
       if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
       const supplierId = $(this).data('id');
-      const url = `{{ path('api_suppliers_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', supplierId);
+      const url = `{{ path('api_admin_suppliers_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', supplierId);
 
       $.ajax({
         url: url,
@@ -186,7 +187,7 @@
       const rowIndex = $tr.data('index');
       const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
       const supplierId = rowData.id;
-      const url = `{{ path('api_suppliers_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', supplierId);
+      const url = `{{ path('api_admin_suppliers_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', supplierId);
 
       let data = {};
       data[field] = newValue;
@@ -207,3 +208,4 @@
       $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
     }
   });
+})();

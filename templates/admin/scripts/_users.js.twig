@@ -1,3 +1,4 @@
+  (function() {
   const penIcon = `<i class="bi bi-pencil"></i>`;
   const trashIcon = `<i class="bi bi-trash"></i>`;
   const editIcon = `<i class="bi bi-pencil-square"></i>`;
@@ -50,6 +51,14 @@
           }
         },
         {
+          field: 'password',
+          title: 'Пароль',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'password');
+          }
+        },
+        {
           field: 'roles',
           title: 'Роли',
           sortable: true,
@@ -66,7 +75,7 @@
         }
       ],
 
-      url: `{{ path('api_users_list') }}`,
+      url: `{{ path('api_admin_users_list') }}`,
       method: 'GET',
       contentType: 'application/json',
 
@@ -138,10 +147,10 @@
       };
       let url, type;
       if (id) {
-        url = `{{ path('api_users_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        url = `{{ path('api_admin_users_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
         type = 'PUT';
       } else {
-        url = `{{ path('api_users_create') }}`;
+        url = `{{ path('api_admin_users_create') }}`;
         type = 'POST';
       }
       $.ajax({
@@ -163,7 +172,7 @@
     $(document).on('click', '.delete-row', function() {
       if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
       const userId = $(this).data('id');
-      const url = `{{ path('api_users_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', userId);
+      const url = `{{ path('api_admin_users_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', userId);
 
       $.ajax({
         url: url,
@@ -207,7 +216,7 @@
       const rowIndex = $tr.data('index');
       const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
       const userId = rowData.id;
-      const url = `{{ path('api_users_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', userId);
+      const url = `{{ path('api_admin_users_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', userId);
 
       let data = {};
       data[field] = newValue;
@@ -228,3 +237,4 @@
       $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
     }
   });
+})();

@@ -48,14 +48,10 @@ Administrator:
 - Affiliates (swap manager id with user name)
 - Assortiment (swap affiliate and product with names)
 - Product Movement (swap affiliate and product with names)
-+ Product
-- Ingredient
 - Ingredient Products (use names)
 - deliveries (Swap supplier with firm name)
-- Supplier
 - Supplier Representatives (swap user id with username, partner id with firmname)
 - Orders (swap product id, partner id  with product name, firmname)
-- partners 
 - partners representatives (swap user id with username, partner id with firmname)
 - Production plan (swap product_id with product name)
 - User 
@@ -63,22 +59,18 @@ Administrator:
 - AdminAffiliatesController               admin_view_affiliates
 - AdminAssortimentController              admin_view_assortiment
 - AdminProductMovementController          admin_view_product_movement
-- AdminProductsController                 admin_view_products
-- AdminIngredientsController              admin_view_ingredients
 - AdminIngredientProductsController       admin_view_ingredient_products
 - AdminDeliveriesController               admin_view_deliveries
-- AdminSuppliersController                admin_view_suppliers
 - AdminSupplierRepresentativesController  admin_view_supplier_representatives
 - AdminProductionPlanController           admin_view_production_plan
 - AdminOrdersController                   admin_view_orders
-- AdminPartnersController                 admin_view_partners
 - AdminPartnerRepresentatinvesController  admin_view_partners_representatives
 - AdminUsersController                    admin_view_users
 
-DirectorOrdersController            director_orders
-DirectorAffiliatesController        director_affiliates
-DirectorProductionController        director_production
-DirectorProductionReportController  director_production_report
+- DirectorOrdersController            director_orders
+- DirectorAffiliatesController        director_affiliates
+- DirectorProductionController        director_production
+- DirectorProductionReportController  director_production_report
 
 Production manager controller:
 - Управление ингредиентами
@@ -136,14 +128,6 @@ Supplier controller:
   - Сортировка по всем полям
   - Фильтрация по диапазону дат, имени продукта
 
-ALIAS (json):
-- Product (id -> name)
-- Affiliate (id -> address)
-- Supplier (id -> firmname)
-- Partner (id -> firmname)
-- Ingridient (id -> name)
-- User (id -> name)
-
 SPECS:
 Procedure:
   - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
@@ -158,7 +142,10 @@ Trigger 2:
 
 LIST:
 - Basic tables for admin (key entityes)
-- Doctrine migrate
 - User roles checkbox
+- Fixtures (normal)
 - Expretiment with linked entityes
+- Search-selection field
+- Password display unconsistent
+- Roles on user not working properly
 - Others

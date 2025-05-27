@@ -9,11 +9,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin_view_products')]
+#[IsGranted('ROLE_ADMIN')]
 class AdminProductsController extends AbstractController
 {
-    #[Route('', name: 'api_products_list', methods: ['GET'])]
+    #[Route('', name: 'api_admin_products_list', methods: ['GET'])]
     public function list(Request $request, ProductsRepository $productsRepository): JsonResponse
     {
         $limit = $request->query->getInt('limit', 10);
@@ -52,30 +54,7 @@ class AdminProductsController extends AbstractController
         ]);
     }
 
-    #[Route('/search', name: 'api_products_search', methods: ['GET'])]
-    public function search(Request $request, ProductsRepository $productsRepository): JsonResponse
-    {
-        $query = $request->query->get('q', '');
-        $products = $productsRepository->createQueryBuilder('p')
-            ->where('p.name LIKE :query')
-            ->setParameter('query', '%' . $query . '%')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult();
-
-        $data = array_map(function($product) {
-            return [
-                'id' => $product->getId(),
-                'name' => $product->getName(),
-                'production_cost' => $product->getProductionCost(),
-                'quantity_storaged' => $product->getQuantityStoraged(),
-            ];
-        }, $products);
-
-        return $this->json($data);
-    }
-
-    #[Route('', name: 'api_products_create', methods: ['POST'])]
+    #[Route('', name: 'api_admin_products_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -94,7 +73,7 @@ class AdminProductsController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'api_products_update', methods: ['PUT'])]
+    #[Route('/{id}', name: 'api_admin_products_update', methods: ['PUT'])]
     public function update(int $id, Request $request, ProductsRepository $productsRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $product = $productsRepository->find($id);
@@ -119,7 +98,7 @@ class AdminProductsController extends AbstractController
         return $this->json(['success' => true]);
     }
 
-    #[Route('/{id}', name: 'api_products_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'api_admin_products_delete', methods: ['DELETE'])]
     public function delete(int $id, ProductsRepository $productsRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $product = $productsRepository->find($id);

@@ -26,4 +26,60 @@ class AdminViewController extends AbstractController
         $response->headers->set('Content-Type', 'application/javascript');
         return $response;
     }
+
+    #[Route('/ingredients', name: 'ingredients')]
+    public function adminViewIngredients(): Response
+    {
+        return $this->render('admin/tables/_ingredients.html.twig', []);
+    }
+
+    #[Route('/ingredients/js', name: 'ingredients_js')]
+    public function adminViewIngredientsJs(): Response
+    {
+        $response = $this->render('admin/scripts/_ingredients.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
+
+    #[Route('/suppliers', name: 'suppliers')]
+    public function adminViewSuppliers(): Response
+    {
+        return $this->render('admin/tables/_suppliers.html.twig', []);
+    }
+
+    #[Route('/suppliers/js', name: 'suppliers_js')]
+    public function adminViewSuppliersJs(): Response
+    {
+        $response = $this->render('admin/scripts/_suppliers.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
+
+    #[Route('/partners', name: 'partners')]
+    public function adminViewPartners(): Response
+    {
+        return $this->render('admin/tables/_partners.html.twig', []);
+    }
+
+    #[Route('/partners/js', name: 'partners_js')]
+    public function adminViewPartnersJs(): Response
+    {
+        $response = $this->render('admin/scripts/_partners.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
+
+    #[Route('/users', name: 'users')]
+    public function adminViewUsers(): Response
+    {
+        return $this->render('admin/tables/_users.html.twig', []);
+    }
+
+    #[Route('/users/js', name: 'users_js')]
+    public function adminViewUsersJs(): Response
+    {
+        $response = $this->render('admin/scripts/_users.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
 } 
