@@ -1,6 +1,6 @@
 <div id="twigHTMLContainer">
 <table id="dynamic-table"></table>
-<button id="add-item-btn" class="btn btn-success mb-2">Добавить товар</button>
+<button id="add-item-btn" class="btn btn-success mb-2">Добавить поставщика</button>
 
 <!-- Модальное окно для добавления/редактирования -->
 <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
@@ -8,23 +8,25 @@
     <form id="item-form">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="itemModalLabel">Товар</h5>
+          <h5 class="modal-title" id="itemModalLabel">Поставщик</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="item-id">
+        <!-- Поля модального окна -->
           <div class="mb-3">
-            <label for="item-name" class="form-label">Наименование</label>
-            <input type="text" class="form-control" id="item-name" required>
+            <label for="item-firmname" class="form-label">Наименование</label>
+            <input type="text" class="form-control" id="item-firmname" required>
           </div>
           <div class="mb-3">
-            <label for="item-quantity" class="form-label">Количество на складе</label>
-            <input type="number" class="form-control" id="item-quantity" step="0.01" required>
+            <label for="item-contact_number" class="form-label">Телефон</label>
+            <input type="text" class="form-control" id="item-contact_number" required>
           </div>
           <div class="mb-3">
-            <label for="item-cost" class="form-label">Стоимость продукции</label>
-            <input type="number" class="form-control" id="item-cost" step="0.01" required>
+            <label for="item-address" class="form-label">Адрес</label>
+            <input type="text" class="form-control" id="item-address" required>
           </div>
+        <!---->
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -36,4 +38,4 @@
 </div>
 </div>
 
-<script type="text/javascript" src="{{ path('admin_table_products_js') }}"></script>
+<script type="text/javascript" src="{{ path('admin_table_suppliers_js') }}"></script>

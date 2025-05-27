@@ -1,0 +1,208 @@
+  const penIcon = `<i class="bi bi-pencil"></i>`;
+  const trashIcon = `<i class="bi bi-trash"></i>`;
+  const editIcon = `<i class="bi bi-pencil-square"></i>`;
+
+  function editableFormatter(value, row, index, field) {
+    return `<span class="editable-span" data-field="${field}" style="cursor:pointer;">${value}${penIcon}</span>`;
+  }
+
+  function actionFormatter(value, row, index) {
+    return `
+      <button type="button" class="btn btn-sm btn-outline-primary edit-row" data-id="${row.id}" title="Редактировать">${editIcon}</button>
+      <button type="button" class="btn btn-sm btn-outline-danger delete-row" data-id="${row.id}" title="Удалить">${trashIcon}</button>
+    `;
+  }
+
+  $(document).ready(function() {
+    $('#dynamic-table').bootstrapTable({
+      search: true,
+      pagination: true,
+      pageList: [10, 25, 50, 100, "All"],
+      sidePagination: 'server',
+      columns: [
+        {
+          field: 'id',
+          title: 'ID',
+          sortable: true,
+        },
+        {
+          field: 'firmname',
+          title: 'Наименование',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'firmname');
+          }
+        },
+        {
+          field: 'address',
+          title: 'Адрес',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'address');
+          }
+        },
+        {
+          field: 'contact_number',
+          title: 'Телефон',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'contact_number');
+          }
+        },
+        // ДОБАВЛЯЕМ КОЛОНКУ ДЕЙСТВИЙ
+        {
+          field: 'actions',
+          title: 'Действия',
+          align: 'center',
+          clickToSelect: false,
+          formatter: actionFormatter
+        }
+      ],
+
+      url: `{{ path('api_partners_list') }}`,
+      method: 'GET',
+      contentType: 'application/json',
+
+      showFooter: true, 
+      showColumns: true,
+      showRefresh: true,
+      showToggle: true,
+      showFullscreen: true,
+
+      responseHandler: function(res) {
+        return {
+          total: res.totalElements,
+          rows: res.content
+        };
+      },
+
+      onLoadError: function(status, jqXHR) {
+        console.error('Error loading data:', status, jqXHR);
+        alert('Error loading data. Please try again.');
+      }
+    });
+
+    const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+    $('#add-item-btn').on('click', function() {
+      $('#itemModalLabel').text('Добавить партнера');
+      $('#item-id').val('');
+      $('#item-firmname').val('');
+      $('#item-address').val('');
+      $('#item-contact_number').val('');
+      itemModal.show();
+    });
+
+    // Кнопка "Редактировать" (в модальном)
+    $(document).on('click', '.edit-row', function() {
+      const partnerId = $(this).data('id');
+      const row = $('#dynamic-table').bootstrapTable('getData').find(r => r.id == partnerId);
+      if (!row) return;
+      $('#itemModalLabel').text('Редактировать партнера');
+      $('#item-id').val(row.id);
+      $('#item-firmname').val(row.firmname);
+      $('#item-address').val(row.address);
+      $('#item-contact_number').val(row.contact_number);
+      itemModal.show();
+    });
+
+    // Сохранить (добавить или обновить)
+    $('#item-form').on('submit', function(e) {
+      e.preventDefault();
+      const id = $('#item-id').val();
+      const data = {
+        firmname: $('#item-firmname').val(),
+        address: $('#item-address').val(),
+        contact_number: $('#item-contact_number').val()
+      };
+      let url, type;
+      if (id) {
+        url = `{{ path('api_partners_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        type = 'PUT';
+      } else {
+        url = `{{ path('api_partners_create') }}`;
+        type = 'POST';
+      }
+      $.ajax({
+        url: url,
+        type: type,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+          itemModal.hide();
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при сохранении!');
+        }
+      });
+    });
+
+    // Удаление строки
+    $(document).on('click', '.delete-row', function() {
+      if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
+      const partnerId = $(this).data('id');
+      const url = `{{ path('api_partners_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', partnerId);
+
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при удалении!');
+        }
+      });
+    });
+
+    // Оставляем инлайн-редактирование, если нужно
+    $(document).on('click', '.editable-span', function() {
+      const $span = $(this);
+      const value = $span.text().replace(/[\u{1F58A}-\u{1F58C}]|<svg[\s\S]*?<\/svg>/gu, '').trim();
+      const field = $span.data('field');
+      let inputType = 'text';
+      let step = '';
+      $span.replaceWith(
+        `<input type="${inputType}" class="form-control editable-input" data-field="${field}" value="${value}" ${step} style="width: 100%; display:inline;">`
+      );
+      $('.editable-input').focus();
+    });
+
+    $(document).on('blur', '.editable-input', function() {
+      saveEdit($(this));
+    });
+    $(document).on('keydown', '.editable-input', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $(this).blur();
+      }
+    });
+
+    function saveEdit($input) {
+      const newValue = $input.val();
+      const field = $input.data('field');
+      const $tr = $input.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const partnerId = rowData.id;
+      const url = `{{ path('api_partners_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', partnerId);
+
+      let data = {};
+      data[field] = newValue;
+
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при обновлении!');
+        }
+      });
+
+      $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
+    }
+  });

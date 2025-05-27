@@ -1,0 +1,58 @@
+<div id="twigHTMLContainer">
+<table id="dynamic-table"></table>
+<button id="add-item-btn" class="btn btn-success mb-2">Добавить пользователя</button>
+
+<!-- Модальное окно для добавления/редактирования -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="item-form">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="itemModalLabel">Пользователь</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="item-id">
+        <!-- Поля модального окна -->
+          <div class="mb-3">
+            <label for="item-email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="item-email" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-username" class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="item-username" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-phone" class="form-label">Телефон</label>
+            <input type="text" class="form-control" id="item-phone">
+          </div>
+          <div class="mb-3">
+            <label for="item-plain-password" class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="item-plain-password" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-roles" class="form-label">Роли</label>
+            <select class="form-control" id="item-roles" multiple>
+              <option value="ROLE_ADMIN">Администратор</option>
+              <option value="ROLE_AFFILIATE_MANAGER">Менеджер филиала</option>
+              <option value="ROLE_DIRECTOR">Директор</option>
+              <option value="ROLE_SUPPLIER_REPRESENTATIVE">Представитель поставщика</option>
+              <option value="ROLE_PARTNER_REPRESENTATIVE">Представитель партнера</option>
+              <option value="ROLE_LOGIST">Логист</option>
+              <option value="ROLE_PRODUCTION_MANAGER">Менеджер производства</option>
+            </select>
+          </div>
+
+        <!---->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary" id="save-item-btn">Сохранить</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+
+<script type="text/javascript" src="{{ path('admin_table_users_js') }}"></script>

@@ -21,6 +21,9 @@ class Suppliers
     #[ORM\Column(length: 255)]
     private ?string $address = null;
 
+    #[ORM\Column(length: 20)]
+    private ?string $contact_number = null;
+
     /**
      * @var Collection<int, User>
      */
@@ -64,6 +67,18 @@ class Suppliers
     public function setAddress(string $address): static
     {
         $this->address = $address;
+
+        return $this;
+    }
+
+    public function getContactNumber(): ?string
+    {
+        return $this->contact_number;
+    }
+
+    public function setContactNumber(string $contact_number): static
+    {
+        $this->contact_number = $contact_number;
 
         return $this;
     }

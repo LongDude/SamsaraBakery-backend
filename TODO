@@ -48,7 +48,7 @@ Administrator:
 - Affiliates (swap manager id with user name)
 - Assortiment (swap affiliate and product with names)
 - Product Movement (swap affiliate and product with names)
-- Product
++ Product
 - Ingredient
 - Ingredient Products (use names)
 - deliveries (Swap supplier with firm name)
@@ -60,20 +60,20 @@ Administrator:
 - Production plan (swap product_id with product name)
 - User 
 
-AdminAffiliatesController               admin_view_affiliates
-AdminAssortimentController              admin_view_assortiment
-AdminProductMovementController          admin_view_product_movement
-AdminProductsController                 admin_view_products
-AdminIngredientsController              admin_view_ingredients
-AdminIngredientProductsController       admin_view_ingredient_products
-AdminDeliveriesController               admin_view_deliveries
-AdminSuppliersController                admin_view_suppliers
-AdminSupplierRepresentativesController  admin_view_supplier_representatives
-AdminProductionPlanController           admin_view_production_plan
-AdminOrdersController                   admin_view_orders
-AdminPartnersController                 admin_view_partners
-AdminPartnerRepresentatinvesController  admin_view_partners_representatives
-AdminUsersController                    admin_view_users
+- AdminAffiliatesController               admin_view_affiliates
+- AdminAssortimentController              admin_view_assortiment
+- AdminProductMovementController          admin_view_product_movement
+- AdminProductsController                 admin_view_products
+- AdminIngredientsController              admin_view_ingredients
+- AdminIngredientProductsController       admin_view_ingredient_products
+- AdminDeliveriesController               admin_view_deliveries
+- AdminSuppliersController                admin_view_suppliers
+- AdminSupplierRepresentativesController  admin_view_supplier_representatives
+- AdminProductionPlanController           admin_view_production_plan
+- AdminOrdersController                   admin_view_orders
+- AdminPartnersController                 admin_view_partners
+- AdminPartnerRepresentatinvesController  admin_view_partners_representatives
+- AdminUsersController                    admin_view_users
 
 DirectorOrdersController            director_orders
 DirectorAffiliatesController        director_affiliates
@@ -156,13 +156,9 @@ Trigger 2:
   - Изменение товара (филиал)
   - Автоматически обновляет ассортимент/стоимости для филиала
 
-
-
-PLAN:
-+ Настроить работу таблиц в шаблонах (из json ручками складывать и пинать на фронт, можно попробровать логику оторвать и пинать отдельно от даты)
-+ Сортировка по произвольным полям
-+ Пагинация
-+ Редактирование в таблице (потенциально произвольное)
-+ Фильтрация по произвольным полям (+ добавить поиск по произвольным)
-+ Удаление строк
-+ Запрос и добавление в модальном окне (пинать формы с бека)
+LIST:
+- Basic tables for admin (key entityes)
+- Doctrine migrate
+- User roles checkbox
+- Expretiment with linked entityes
+- Others
