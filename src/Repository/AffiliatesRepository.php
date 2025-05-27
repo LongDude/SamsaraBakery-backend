@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Affiliates;
-use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,21 +16,28 @@ class AffiliatesRepository extends ServiceEntityRepository
         parent::__construct($registry, Affiliates::class);
     }
 
-    public function listAll(){
-        return $this->createQueryBuilder("a")
-        ->join("a.manager_id", "m")
-        ->getQuery()
-        ->getResult();
-    }
+    //    /**
+    //     * @return Affiliates[] Returns an array of Affiliates objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('a')
+    //            ->andWhere('a.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('a.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
 
-
-    public function listRevenue(
-        DateTimeImmutable $timeFrom,
-        DateTimeImmutable $timeUntil,
-    ) {
-        $rep = new ProductsMovementRepository($this->getEntityManager());
-        $rep->select("")
-        ->join("a.manager_id", "m")
-        ->join();
-    }
+    //    public function findOneBySomeField($value): ?Affiliates
+    //    {
+    //        return $this->createQueryBuilder('a')
+    //            ->andWhere('a.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }

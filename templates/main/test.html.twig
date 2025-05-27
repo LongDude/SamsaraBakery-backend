@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Тестовая страница{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            {% include 'admin/_products.html.twig' with {
+                products: products | default([]),
+                totalProducts: totalProducts | default(0),
+                totalPages: totalPages | default(0),
+                page: page | default(1),
+                limit: limit | default(10),
+            } %}
+        </div>
+    </div>
+</div>
+{% endblock %}

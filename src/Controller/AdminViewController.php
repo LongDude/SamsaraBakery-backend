@@ -14,7 +14,7 @@ class AdminViewController extends AbstractController
     public function adminViewProducts(Request $request, ProductsRepository $productsRepository): Response
     {
         $page = $request->query->getInt('page', 1);
-        $limit = 10;
+        $limit = $request->query->getInt('limit', 10);
         $offset = ($page - 1) * $limit;
 
         $products = $productsRepository->findBy([], [], $limit, $offset);

@@ -16,15 +16,26 @@ class AdminProductsController extends AbstractController
     #[Route('', name: 'api_products_list', methods: ['GET'])]
     public function list(Request $request, ProductsRepository $productsRepository): JsonResponse
     {
-        $page = $request->query->getInt('page', 1);
-        $limit = 10;
-        $offset = ($page - 1) * $limit;
+        $limit = $request->query->getInt('limit', 10);
+        $offset = $request->query->getInt('offset', 1);
         $sort = $request->query->get('sort', 'id');
         $order = $request->query->get('order', 'asc');
+        $search = $request->query->get('search', '');
 
-        $products = $productsRepository->findBy([], [$sort => $order], $limit, $offset);
-        $totalProducts = $productsRepository->count([]);
-        $totalPages = ceil($totalProducts / $limit);
+        $qb = $productsRepository->createQueryBuilder('p');
+        if ($search) {
+            $qb->where('p.name LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        $qb->orderBy('p.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        
+        $products = $qb->getQuery()->getResult();
+        $totalProducts = $productsRepository->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
 
         $data = array_map(function($product) {
             return [
@@ -36,12 +47,8 @@ class AdminProductsController extends AbstractController
         }, $products);
 
         return $this->json([
-            'items' => $data,
-            'pagination' => [
-                'current_page' => $page,
-                'total_pages' => $totalPages,
-                'total_items' => $totalProducts
-            ]
+            'content' => $data,
+            'totalElements' => $totalProducts,
         ]);
     }
 
@@ -87,7 +94,7 @@ class AdminProductsController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'api_products_update', methods: ['PATCH'])]
+    #[Route('/{id}', name: 'api_products_update', methods: ['PUT'])]
     public function update(int $id, Request $request, ProductsRepository $productsRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $product = $productsRepository->find($id);
