@@ -138,6 +138,7 @@
         },
         error: function(xhr) {
           alert('Ошибка при сохранении!');
+          $('#dynamic-table').bootstrapTable('refresh');
         }
       });
     });
@@ -230,7 +231,7 @@
         source: function(request, response) {
           // AJAX-запрос на сервер для поиска пользователей
           $.ajax({
-            url: `{{ path('api_admin_users_search') }}`, // ваш эндпоинт поиска
+            url: `{{ path('api_admin_affiliates_search_manager', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', rowData.id), // ваш эндпоинт поиска
             data: { q: request.term },
             success: function(data) {
               // data — массив объектов: [{label: "Имя (email)", value: "Имя", email: "email"}]
@@ -259,10 +260,11 @@
     function saveManagerEdit($input, rowIndex) {
       const selectedEmail = $input.data('selected-email');
       const displayName = $input.val();
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
       if (!selectedEmail) {
         // Если пользователь не выбрал из списка — делаем повторный поиск и берём первый результат
         $.ajax({
-          url: `{{ path('api_admin_users_search') }}`,
+          url: `{{ path('api_admin_affiliates_search_manager', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', rowData.id),
           data: { q: displayName },
           success: function(data) {
             if (data && data.length > 0) {
