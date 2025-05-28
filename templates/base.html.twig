@@ -9,30 +9,29 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚕️</text></svg>">
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/bootstrap-table.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.css">
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="/sources/bootstrap/bootstrap.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';">
+        <link rel="stylesheet" href="/sources/bootstrap/bootstrap-icons.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css';">
+        <link rel="stylesheet" href="/sources/bootstrap/bootstrap-table.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/bootstrap-table.min.css';">
+        <link rel="stylesheet" href="/sources/bootstrap/bootstrap-table-filter-control.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.css';">
+        <link rel="stylesheet" href="/sources/select2.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css';">
 
-        <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.7.0"></script>
-<script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.7.0"></script>
+
+        <script src="/sources/jquery.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js'"></script>
+        <script src="/sources/jquery-ui.min.js" onerror="this.onerror=null;this.src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'"></script>
+        <script src="/sources/floating_ui/core" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@floating-ui/core@1.7.0'"></script>
+        <script src="/sources/floating_ui/dom" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.7.0'"></script>
 
 
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
         {% block body %}{% endblock %}
-    
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/bootstrap-table.min.js"></script>    
 
+<script src="/sources/bootstrap/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'"></script>
+<script src="/sources/bootstrap/bootstrap-table.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/bootstrap-table.min.js'"></script>
+<script src="/sources/bootstrap/bootstrap-table-filter-control.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js'"></script>
+<script src="/sources/select2.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js'"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        
         {% block javascripts %}{% endblock %}
     </body>
 </html>
