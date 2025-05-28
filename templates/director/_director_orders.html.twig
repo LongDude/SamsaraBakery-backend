@@ -1,0 +1,114 @@
+<div id="twigHTMLContainer">
+<table id="dynamic-table">
+</table>
+<button id="add-item-btn" class="btn btn-success mb-2">Добавить заказ</button>
+<button id="download-excel-btn" class="btn btn-outline-secondary mb-2">Скачать отчет (Excel)</button>
+<button id="download-pdf-btn" class="btn btn-outline-secondary mb-2">Скачать отчет (PDF)</button>
+
+
+
+<!-- Popup фильтр по статусу -->
+<div class="modal fade" id="statusFilterModal" tabindex="-1" aria-labelledby="statusFilterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="statusFilterModalLabel">Фильтр по статусу</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <select id="status-filter-select" class="form-select">
+          <option value="">Все статусы</option>
+          <option value="Order recieved">Принят</option>
+          <option value="Order processing">В обработке</option>
+          <option value="Order approved">Одобрен</option>
+          <option value="Order in production">В производстве</option>
+          <option value="Order is in storage">На складе</option>
+          <option value="Order being delivered">Доставляется</option>
+          <option value="Order delivered">Доставлен</option>
+          <option value="Order closed">Закрыт (отмена)</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="apply-status-filter-btn">Применить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup фильтр по дате -->
+<div class="modal fade" id="dateFilterModal" tabindex="-1" aria-labelledby="dateFilterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dateFilterModalLabel">Фильтр по дате</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <label for="date-from" class="form-label">С:</label>
+        <input type="date" id="date-from" class="form-control mb-2">
+        <label for="date-to" class="form-label">По:</label>
+        <input type="date" id="date-to" class="form-control">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="apply-date-filter-btn">Применить</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Модальное окно для добавления -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="item-form">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="itemModalLabel">Заказ</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="item-id">
+          <div class="mb-3">
+            <label for="item-partner_firmname" class="form-label">Партнер</label>
+            <input type="text" class="form-control" id="item-partner_firmname" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-product" class="form-label">Продукт</label>
+            <input type="text" class="form-control" id="item-product" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-price" class="form-label">Цена</label>
+            <input type="number" class="form-control" id="item-price" step="0.01" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-quantity" class="form-label">Количество</label>
+            <input type="number" class="form-control" id="item-quantity" step="0.01" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-status" class="form-label">Статус</label>
+            <select class="form-control" id="item-status" required>
+              <option value="Order recieved">Принято</option>
+              <option value="Order processing">Обработка</option>
+              <option value="Order approved">Утверждено</option>
+              <option value="Order closed">Закрыто</option>
+            </select>
+        </div>
+        <div class="mb-3">
+        <label for="item-date" class="form-label">Дата</label>
+        <input type="date" class="form-control" id="item-date" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary" id="save-item-btn">Сохранить</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+</div>
+
+<script type="text/javascript" src="{{ path('director_table_orders_js') }}"></script>

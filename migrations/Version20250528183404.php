@@ -40,22 +40,26 @@ final class Version20250528183404 extends AbstractMigration
         
         // 8.2  - Director - Управление филиалами
         $this->addSql(<<<'SQL'
-            CREATE OR REPLACE VIEW director_affiliates_view AS
+            CREATE OR REPLACE VIEW director_affiliate_finance_view AS
             SELECT
-                p.id AS partner_id,
-                p.address AS affiliate_address,
-                p.contact_number,
+                a.id AS affiliate_id,
+                a.address AS affiliate_address,
+                a.contact_number,
                 u.id AS manager_id,
                 u.username AS manager_name,
                 u.phone AS manager_phone,
-                COALESCE(SUM(o.price * o.quantity), 0) AS revenue
+                pm.date::date AS day,
+                COALESCE(SUM(pm.realised_price), 0) AS revenue,
+                COALESCE(SUM(pm.recieved_cost), 0) AS cost,
+                COALESCE(SUM(pm.realised_price), 0) - COALESCE(SUM(pm.recieved_cost), 0) AS net_revenue
             FROM
-                partners p
-            LEFT JOIN partners_user pu ON pu.partners_id = p.id
-            LEFT JOIN "user" u ON u.id = pu.user_id
-            LEFT JOIN orders o ON o.reciever_partner_id = p.id
+                affiliates a
+            LEFT JOIN "user" u ON u.id = a.manager_id
+            LEFT JOIN products_movement pm ON pm.affiliate_id = a.id
             GROUP BY
-                p.id, p.address, p.contact_number, u.id, u.username, u.phone;
+                a.id, a.address, a.contact_number, u.id, u.username, u.phone, pm.date::date
+            ORDER BY
+                a.id, day;
         SQL);
 
         // 8.3 - Director - Добавление продукции
@@ -150,7 +154,7 @@ final class Version20250528183404 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->addSql('DROP VIEW director_orders_view');
-        $this->addSql('DROP VIEW director_affiliates_view');
+        $this->addSql('DROP VIEW director_affiliate_finance_view');
         $this->addSql('DROP VIEW director_production_view');
         $this->addSql('DROP VIEW director_production_report_summary_view');
         $this->addSql('DROP VIEW director_production_report_view');
