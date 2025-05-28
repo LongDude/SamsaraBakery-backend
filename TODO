@@ -1,12 +1,29 @@
-Пользователь:
-  - Просмотр списка продукции
-    - | Product | Price | quantity | 
-    - Read only
-    - Фильтрация по продукту
-    - Сортировка по всем полям
+1. Assortiment (affiliate_id, product_id, quantity, price, daily_delivery)
+2. Product Movement (affiliate_id, product_id, realised_price, realised_count, recieved_cost, recieved_count, date)
+3. Recipes (ingredient_id, product_id, quantity)
+4. Production plan (product_id, date, quantity)
+5. Deliveries (supplier_id, product_id, quantity, price, date, status)
+6. Orders (partner_id, product_id, quantity, price, date, status)
+7. Database objects:
+7.1  Procedure 1 - доставка товара:
+    - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
+    - Обновляет Product movenemt новой записью/обновление текущей
+    - Обновляет Assortiment данными (иначе процедура обваливается)
+    - Обновляет склад (иначе процедура обваливается)
+7.2  Procedure 2 - продажа товара:
+    - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
+    - Обновляет Product movenemt новой записью/обновление текущей
+    - Обновляет Assortiment данными (иначе процедура обваливается)
+7.3  Trigger 1: Автоматическое обновление выручки за сутки (филиал)
+7.4  Trigger 2: Обновление статуса поставки
+7.5  Trigger 3: Обновление статуса заказа
+7.6  View 1: Список заказов  
+7.7  View 2: Филиалы с выручкой за период
+7.8  View 3: Отчет о продажах
 
-Director Controller:
-!  - Управление списком заказов
+8. Director tables (filtration and reports)
+8.1  - Управление списком заказов
+    - DirectorOrdersController            director_orders
     - | Partner firmname | product | price | quantity | Status
     - Может удалить любую/на любой стадии
     - Может изменить статус на "Принято"
@@ -14,118 +31,84 @@ Director Controller:
     - Сортировка по всем полям
     - Фильтрация по имени/продукту и статусу
     - Генерация отчетов
-!  - Управление филиалами
+8.2  - Управление филиалами
+    - DirectorAffiliatesController        director_affiliates
+
     - | Affiliate address | contact number | Revenue | Manager |
     - Выбор временного периода
     - Вывод информации о филиале + Имя и номер менеджера + Чистая Выручка за период
     - Добавление филиала/управление сотрудником на должности
     - Генерация отчетов
-!  - Добавление продукции
+8.3  - Добавление продукции
+- DirectorProductionController        director_production
     - |Product name|production cost|
-!  - Отчет о продажах
+8.4  - Отчет о продажах
+- DirectorProductionReportController  director_production_report
+
     - | Product name | Date | Revenue | Orders Revenue | Cost | Net revenue |Producted count | Sold count | Realisation index | 
     - Фильтация по полю Product Name
     - Выбор временного периода (фильтрация + период при отсутсвии флага)
     - Сортировка по всем полям
     - Флаг summary - удаляет Date для общего обзора периода
     - генерация отчетов
-  - Сотрудники
-    - Измененеи ролей (ограниченное множество)
-    - Удаление
-    - Добавление
-  - Представители фирм
-    - | firmname | username |
-    - Добавление по имени пользователя/фирмы
-    - Фильтрация по имени фирмы/пользователя
-    - Удаление
-  - Представители поставщиков
-    - | firmname | username |
-    - Добавление по имени пользователя/фирмы
-    - Фильтрация по имени фирмы/пользователя
-    - Удаление
-
-Administrator:
-- Assortiment (affiliate_id, product_id)
-- Product Movement (affiliate_id, product_id)
-- Ingredient Products (ingredient_id, product_id)
-- deliveries (supplier_id, product_id)
-- Production plan (product_id)
-- Orders (product_id, partner_id)
-
-- DirectorOrdersController            director_orders
-- DirectorAffiliatesController        director_affiliates
-- DirectorProductionController        director_production
-- DirectorProductionReportController  director_production_report
-
-Production manager controller:
-- Управление ингредиентами
+9. Пользователь:
+9.1  Просмотр списка продукции
+    - | Product | Price | quantity | 
+    - Read only
+    - Фильтрация по продукту
+    - Сортировка по всем полям
+10. Production manager controller:
+10.1  Управление ингредиентами
   - | name | quantity |
   - Может добавлять/редактировать записи
-- Управление рецептами
+10.2  Управление рецептами
   - | Product name | Ingredient | quantity on storage | quantity per recipe |
   - CRUD
   - Фильтрация по ингредиентами/продуктам
   - Сортировка по всем полям
-- Управление продукцией
+10.3  Управление продукцией
   - | Product name | Productm count |
   - Может изменить количество продукта
-- Управление производственным планом
+10.4  Управление производственным планом
   - | Product name | date | quantity |
   - Фильтрация по диапазону дат/продукту
   - Сортировка по всем полям
 
-Affiliate manager controller:
-- Управление ассортиментом
+11. Affiliate manager controller:
+11.1  Управление ассортиментом
   - | Product name | quantity | price | daily delivery |
   - Фильтрация по имени продукта
   - Сортировка по всем полям
   - Может полностью редактировать таблицу
   - Может добавить только отсутствующий продукт
-- Управление движением товара
+11.2  Управление движением товара
   - | Product name | Date(always TODAY) | realised_count | recieved_count |
   - Фильтрация по имени продукта
   - Сортировка по всем полям
   - Почти все перехватывается триггерами: добавление записи прибавляется к прошлой, стоимостная оценка считается автоматически
   - Доступны только INSERT (POST)
 
-Logist controller:
-- Просмотр дневных поставок
+12. Logist controller:
+12.1  Просмотр дневных поставок
   - | Affilaite adress | contact number | product | quantity |
   - Формируется путем исключения доставок assortiment_daily  из product_movement 
   - Может отмечать заказ как доставленный (вызывает процедуру)
-- Просмотр заказов
+12.2  Просмотр заказов
   - | Partner firmname | partner adress | contact number | product | quantity | Date | 
   - Только записи с статусом IN_STORAGE/BEING_DELIEVERED
   - Может менять статус заказа на BEING_DELIEVERED/DELIEVERED
 
-Partner controller:
-- Заказы
+13. Partner controller:
+13.1  Заказы
   - Учитывает id партнера
   - | Product | Date | quantity | Cost | Status |
   - На стадии RECIEVED|PROCESSING может быть отменен\изменен
   - Сортировка по всем полям
   - Фильтрация по диапазону дат, имени продукта и статусу
 
-Supplier controller:
-- Доставки
+14. Supplier controller:
+14.1  Доставки
   - Учитывает id поставщика
   - | Product | date | quantity | Cost |
   - Сортировка по всем полям
   - Фильтрация по диапазону дат, имени продукта
-
-SPECS:
-Procedure:
-  - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
-  - Обновляет Product movenemt новой записью/обновление текущей
-  - Обновляет Assortiment данными (иначе процедура обваливается)
-Trigger 1: 
-  - Добавление продукта (склад)
-  - Автоматически вычитает количество ингридиентов со склада по рецепту
-Trigger 2: 
-  - Изменение товара (филиал)
-  - Автоматически обновляет ассортимент/стоимости для филиала
-
-LIST:
-- Basic tables for admin (key entityes)
-- Director tables
-- Functions (views)

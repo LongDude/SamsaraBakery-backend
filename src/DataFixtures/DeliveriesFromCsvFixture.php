@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Deliveries;
 use App\Entity\Ingredients;
 use App\Entity\Suppliers;
-use App\Enum\OrderStatus;
+use App\Enum\DeliveryStatus;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -40,7 +40,7 @@ class DeliveriesFromCsvFixture extends Fixture implements DependentFixtureInterf
             $delivery->setQuantity($row['quantity']);
             $delivery->setPrice($row['price']);
             $delivery->setDate(DateTime::createFromFormat('Y-m-d', $row['date']));
-            $delivery->setStatus(OrderStatus::from($row['status']));
+            $delivery->setStatus(DeliveryStatus::from($row['status']));
 
             $manager->persist($delivery);
         }

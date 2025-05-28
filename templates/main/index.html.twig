@@ -190,6 +190,16 @@
                     });
             });
         });
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebar && sidebarToggle && mainContent) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('main-content-collapsed');
+            });
+        }
     });
     </script>
 {% endblock %}

@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Enum\OrderStatus;
+use App\Enum\DeliveryStatus;
 use App\Repository\DeliveriesRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -32,8 +32,8 @@ class Deliveries
     #[ORM\JoinColumn(nullable: false)]
     private ?Ingredients $ingredient = null;
 
-    #[ORM\Column(enumType: OrderStatus::class)]
-    private ?OrderStatus $status = OrderStatus::RECIEVED;
+    #[ORM\Column(enumType: DeliveryStatus::class)]
+    private ?DeliveryStatus $status = DeliveryStatus::REQUEST_SENT;
 
     public function getId(): ?int
     {
@@ -100,12 +100,12 @@ class Deliveries
         return $this;
     }
 
-    public function getStatus(): ?OrderStatus
+    public function getStatus(): ?DeliveryStatus
     {
         return $this->status;
     }
 
-    public function setStatus(OrderStatus $status): static
+    public function setStatus(DeliveryStatus $status): static
     {
         $this->status = $status;
 

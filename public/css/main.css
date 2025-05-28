@@ -89,8 +89,9 @@
     transition: all 0.3s ease;
 }
 
-.main-content.expanded {
-    margin-left: var(--sidebar-collapsed-width);
+.main-content-collapsed {
+    margin-left: 0 !important;
+    width: 100% !important;
 }
 
 .toggle-sidebar {
