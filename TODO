@@ -45,17 +45,15 @@ Director Controller:
     - Удаление
 
 Administrator:
-- Affiliates (swap manager id with user name)
-- Assortiment (swap affiliate and product with names)
-- Product Movement (swap affiliate and product with names)
-- Ingredient Products (use names)
-- deliveries (Swap supplier with firm name)
-- Supplier Representatives (swap user id with username, partner id with firmname)
-- Orders (swap product id, partner id  with product name, firmname)
-- partners representatives (swap user id with username, partner id with firmname)
-- Production plan (swap product_id with product name)
+- Assortiment (affiliate_id, product_id)
+- Product Movement (affiliate_id, product_id)
+- Ingredient Products (ingredient_id, product_id)
+- deliveries (supplier_id, product_id)
+- Supplier Representatives (user_id, supplier_id)
+- Orders (product_id, partner_id)
+- partners representatives (user_id, partner_id)
+- Production plan (product_id)
 
-- AdminAffiliatesController               admin_view_affiliates
 - AdminAssortimentController              admin_view_assortiment
 - AdminProductMovementController          admin_view_product_movement
 - AdminProductsRecipiesController       admin_view_products_recipies
@@ -138,25 +136,7 @@ Trigger 2:
   - Изменение товара (филиал)
   - Автоматически обновляет ассортимент/стоимости для филиала
 
-FIXTURES:
-- Products
-- Ingredients
-- Products_recipies
-- Suppliers
-- Deliveries
-- Affiliates
-- Assortiment
-- Product Movement
-- Production plan
-- Partners
-- Orders
-- Partner Representatives
-- Supplier Representatives
-- Users
-
 LIST:
 - Basic tables for admin (key entityes)
-- Fixtures (normal)
-- Expretiment with linked entityes
-- Search-selection field
-- Others
+- Director tables
+- Functions (views)

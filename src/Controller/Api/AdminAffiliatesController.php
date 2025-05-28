@@ -47,7 +47,7 @@ class AdminAffiliatesController extends AbstractController
                 'id' => $affiliate->getId(),
                 'address' => $affiliate->getAddress(),
                 'contact_number' => $affiliate->getContactNumber(),
-                'manager' => $affiliate->getManager()->getUsername(),
+                'manager' => $affiliate->getManager() ? $affiliate->getManager()->getUsername() : '',
             ];
         }, $affiliates);
 
@@ -58,14 +58,20 @@ class AdminAffiliatesController extends AbstractController
     }
 
     #[Route('', name: 'api_admin_affiliates_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         $affiliate = new Affiliates();
         $affiliate->setAddress($data['address']);
         $affiliate->setContactNumber($data['contact_number']);
-        $affiliate->setManager($data['manager']);
+        if (isset($data['manager_id'])) {
+            $user = $userRepository->find($data['manager_id']);
+            if (!$user) {
+                return $this->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+            $affiliate->setManager($user);
+        }
 
         $entityManager->persist($affiliate);
         $entityManager->flush();
@@ -92,18 +98,16 @@ class AdminAffiliatesController extends AbstractController
         if (isset($data['contact_number'])) {
             $affiliate->setContactNumber($data['contact_number']);
         }
-        if (isset($data['managerEmail'])) {
-            $user = $userRepository->findOneBy(['email' => $data['managerEmail']]);
-            if ($data['managerEmail'] == '') {
-                $user = null;
-            } elseif (!$user) {
-                return $this->json(['success' => false, 'message' => 'User not found'], 404);
+        if (isset($data['manager_id'])) {
+            if ($data['manager_id'] == -1) {
+                $affiliate->setManager(null);
+            } else {
+                $user = $userRepository->find($data['manager_id']);
+                if (!$user) {
+                    return $this->json(['success' => false, 'message' => 'User not found'], 404);
+                }
+                $affiliate->setManager($user);
             }
-            if ($affiliate->getManager() && $affiliate->getManager()->getId() != $user->getId()) {
-                $affiliate->getManager()->setAffiliate(null);
-            }
-
-            $affiliate->setManager($user);
         }
 
         $entityManager->flush();
@@ -114,23 +118,27 @@ class AdminAffiliatesController extends AbstractController
     #[Route('/{id}/search_manager', name: 'api_admin_affiliates_search_manager', methods: ['GET'])]
     public function search(int $id, Request $request, AffiliatesRepository $affiliatesRepository, UserRepository $userRepository): JsonResponse
     {
-        $search = $request->query->get('search', '');
+        $search = $request->query->get('q', '');
         $qb = $userRepository->createQueryBuilder('u');
 
         // Подзапрос для занятых менеджеров
         $subQ = $affiliatesRepository->createQueryBuilder('a')
             ->select('IDENTITY(a.manager)')
             ->where('a.id != :affiliate_id')
-            ->andWhere('a.manager IS NOT NULL');
+            ->andWhere('a.manager IS NOT NULL')
+            ->setParameter('affiliate_id', $id);
 
-        $qb->where($qb->expr()->notIn('u.id', $subQ->getDQL()))
-        ->setParameter('affiliate_id', $id);
+        $expr = $qb->expr();
+        $searchCond = $expr->orX(
+            $expr->like('u.Username', ':search'),
+            $expr->like('u.email', ':search')
+        );
 
-        if ($search) {
-            $qb->andWhere('u.Username LIKE :search')
-                ->orWhere('u.email LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
-        }
+        $qb->where($expr->notIn('u.id', $subQ->getDQL()))
+           ->andWhere($searchCond)
+           ->setParameter('search', '%' . $search . '%')
+           ->setParameter('affiliate_id', $id);
+
         $qb->orderBy('u.Username', 'asc');
         $qb->setMaxResults(10);
         $users = $qb->getQuery()->getResult();
@@ -139,7 +147,7 @@ class AdminAffiliatesController extends AbstractController
             return [
                 'label' => ($user->getUsername() ?? '')."(".$user->getEmail().")",
                 'value' => $user->getUsername(),
-                'email' => $user->getEmail(),
+                'id' => $user->getId(),
             ];
         }, $users);
         return $this->json($data);
