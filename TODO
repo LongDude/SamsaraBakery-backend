@@ -58,7 +58,7 @@ Administrator:
 - AdminAffiliatesController               admin_view_affiliates
 - AdminAssortimentController              admin_view_assortiment
 - AdminProductMovementController          admin_view_product_movement
-- AdminIngredientProductsController       admin_view_ingredient_products
+- AdminProductsRecipiesController       admin_view_products_recipies
 - AdminDeliveriesController               admin_view_deliveries
 - AdminSupplierRepresentativesController  admin_view_supplier_representatives
 - AdminProductionPlanController           admin_view_production_plan
@@ -137,6 +137,22 @@ Trigger 1:
 Trigger 2: 
   - Изменение товара (филиал)
   - Автоматически обновляет ассортимент/стоимости для филиала
+
+FIXTURES:
+- Products
+- Ingredients
+- Products_recipies
+- Suppliers
+- Deliveries
+- Affiliates
+- Assortiment
+- Product Movement
+- Production plan
+- Partners
+- Orders
+- Partner Representatives
+- Supplier Representatives
+- Users
 
 LIST:
 - Basic tables for admin (key entityes)

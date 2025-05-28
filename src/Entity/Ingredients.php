@@ -28,15 +28,16 @@ class Ingredients
     private Collection $deliveries;
 
     /**
-     * @var Collection<int, Products>
+     * @var Collection<int, ProductsRecipies>
      */
-    #[ORM\ManyToMany(targetEntity: Products::class, inversedBy: 'ingredients')]
-    private Collection $product;
+    #[ORM\OneToMany(targetEntity: ProductsRecipies::class, mappedBy: 'ingredient_id')]
+    private Collection $productsRecipies;
 
     public function __construct()
     {
         $this->deliveries = new ArrayCollection();
         $this->product = new ArrayCollection();
+        $this->productsRecipies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -99,25 +100,31 @@ class Ingredients
     }
 
     /**
-     * @return Collection<int, Products>
+     * @return Collection<int, ProductsRecipies>
      */
-    public function getProduct(): Collection
+    public function getProductsRecipies(): Collection
     {
-        return $this->product;
+        return $this->productsRecipies;
     }
 
-    public function addProduct(Products $product): static
+    public function addProductsRecipy(ProductsRecipies $productsRecipy): static
     {
-        if (!$this->product->contains($product)) {
-            $this->product->add($product);
+        if (!$this->productsRecipies->contains($productsRecipy)) {
+            $this->productsRecipies->add($productsRecipy);
+            $productsRecipy->setIngredientId($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(Products $product): static
+    public function removeProductsRecipy(ProductsRecipies $productsRecipy): static
     {
-        $this->product->removeElement($product);
+        if ($this->productsRecipies->removeElement($productsRecipy)) {
+            // set the owning side to null (unless already changed)
+            if ($productsRecipy->getIngredientId() === $this) {
+                $productsRecipy->setIngredientId(null);
+            }
+        }
 
         return $this;
     }

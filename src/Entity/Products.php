@@ -44,10 +44,10 @@ class Products
     private ?int $quantity_storaged = null;
 
     /**
-     * @var Collection<int, Ingredients>
+     * @var Collection<int, ProductsRecipies>
      */
-    #[ORM\ManyToMany(targetEntity: Ingredients::class, mappedBy: 'product')]
-    private Collection $ingredients;
+    #[ORM\OneToMany(targetEntity: ProductsRecipies::class, mappedBy: 'product_id')]
+    private Collection $productsRecipies;
 
     public function __construct()
     {
@@ -55,6 +55,7 @@ class Products
         $this->productsMovements = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->ingredients = new ArrayCollection();
+        $this->productsRecipies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -189,27 +190,30 @@ class Products
     }
 
     /**
-     * @return Collection<int, Ingredients>
+     * @return Collection<int, ProductsRecipies>
      */
-    public function getIngredients(): Collection
+    public function getProductsRecipies(): Collection
     {
-        return $this->ingredients;
+        return $this->productsRecipies;
     }
 
-    public function addIngredient(Ingredients $ingredient): static
+    public function addProductsRecipy(ProductsRecipies $productsRecipy): static
     {
-        if (!$this->ingredients->contains($ingredient)) {
-            $this->ingredients->add($ingredient);
-            $ingredient->addProduct($this);
+        if (!$this->productsRecipies->contains($productsRecipy)) {
+            $this->productsRecipies->add($productsRecipy);
+            $productsRecipy->setProductId($this);
         }
 
         return $this;
     }
 
-    public function removeIngredient(Ingredients $ingredient): static
+    public function removeProductsRecipy(ProductsRecipies $productsRecipy): static
     {
-        if ($this->ingredients->removeElement($ingredient)) {
-            $ingredient->removeProduct($this);
+        if ($this->productsRecipies->removeElement($productsRecipy)) {
+            // set the owning side to null (unless already changed)
+            if ($productsRecipy->getProductId() === $this) {
+                $productsRecipy->setProductId(null);
+            }
         }
 
         return $this;

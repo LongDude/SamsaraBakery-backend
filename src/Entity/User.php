@@ -27,7 +27,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $roles = ['ROLE_USER'];
 
     /**
@@ -53,7 +53,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Partners::class, mappedBy: 'representatives')]
     private Collection $partners_represent;
 
-    #[ORM\OneToOne(mappedBy: 'manager', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'manager')]
     private ?Affiliates $affiliate = null;
     
     public function __construct()
@@ -105,7 +105,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function setRoles(array $roles): static
     {
-        $this->roles = $roles;
+        $roles[] = 'ROLE_USER';
+        $this->roles = array_unique($roles);
 
         return $this;
     }

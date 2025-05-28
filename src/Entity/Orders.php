@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Enum\OrderStatus;
 use App\Repository\OrdersRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrdersRepository::class)]
@@ -29,7 +30,10 @@ class Orders
     private ?int $quantity = null;
 
     #[ORM\Column(enumType: OrderStatus::class)]
-    private ?OrderStatus $status = null;
+    private ?OrderStatus $status = OrderStatus::RECIEVED;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $date = null;
 
 
     public function getId(): ?int
@@ -93,6 +97,18 @@ class Orders
     public function setStatus(OrderStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTime
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTime $date): static
+    {
+        $this->date = $date;
 
         return $this;
     }

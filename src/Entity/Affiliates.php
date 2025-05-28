@@ -22,7 +22,7 @@ class Affiliates
     #[ORM\Column(length: 20)]
     private ?string $contact_number = null;
 
-    #[ORM\OneToOne(inversedBy: 'affiliate', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'affiliate')]
     private ?User $manager = null;
 
     /**

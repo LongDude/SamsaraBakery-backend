@@ -8,7 +8,7 @@ enum OrderStatus: string{
     case APPROVED = 'Order approved';
     case IN_PRODUCTION = 'Order in production';
     case IN_STORAGE = 'Order is in storage';
-    case BEING_DELIEVERED = 'Order being delievered';
-    case DELIEVERED = 'Order delieverd';
+    case BEING_DELIVERED = 'Order being delivered';
+    case DELIVERED = 'Order delivered';
     case CLOSED = 'Order closed';
 }
