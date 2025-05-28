@@ -6,6 +6,7 @@ use App\Repository\ProductsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductsRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_NAME', fields: ['name'])]
@@ -34,14 +35,16 @@ class Products
     #[ORM\OneToMany(targetEntity: Orders::class, mappedBy: 'product')]
     private Collection $orders;
 
-    #[ORM\Column]
-    private ?float $production_cost = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?float $production_cost = 0;
 
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?int $quantity_storaged = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $quantity_storaged = 0;
 
     /**
      * @var Collection<int, ProductsRecipies>

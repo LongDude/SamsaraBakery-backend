@@ -6,6 +6,7 @@ use App\Enum\DeliveryStatus;
 use App\Repository\DeliveriesRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DeliveriesRepository::class)]
 class Deliveries
@@ -18,11 +19,13 @@ class Deliveries
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $date = null;
 
-    #[ORM\Column]
-    private ?float $quantity = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $quantity = 0;
 
-    #[ORM\Column]
-    private ?float $price = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?float $price = 0;
 
     #[ORM\ManyToOne(inversedBy: 'deliveries')]
     #[ORM\JoinColumn(nullable: false)]
@@ -52,12 +55,12 @@ class Deliveries
         return $this;
     }
 
-    public function getQuantity(): ?float
+    public function getQuantity(): ?int
     {
         return $this->quantity;
     }
 
-    public function setQuantity(float $quantity): static
+    public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
 

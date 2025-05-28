@@ -1,9 +1,9 @@
-1. Assortiment (affiliate_id, product_id, quantity, price, daily_delivery)
-2. Product Movement (affiliate_id, product_id, realised_price, realised_count, recieved_cost, recieved_count, date)
-3. Recipes (ingredient_id, product_id, quantity)
-4. Production plan (product_id, date, quantity)
-5. Deliveries (supplier_id, product_id, quantity, price, date, status)
-6. Orders (partner_id, product_id, quantity, price, date, status)
+[X] 1. Assortiment (affiliate_id, product_id, quantity, price, daily_delivery)
+[X] 2. Product Movement (affiliate_id, product_id, realised_price, realised_count, recieved_cost, recieved_count, date)
+[X] 3. Recipes (ingredient_id, product_id, quantity)
+[X] 4. Production plan (product_id, date, quantity)
+[X] 5. Deliveries (supplier_id, product_id, quantity, price, date, status)
+[X] 6. Orders (partner_id, product_id, quantity, price, date, status)
 7. Database objects:
 7.1  Procedure 1 - доставка товара:
     - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
@@ -57,57 +57,57 @@
     - Read only
     - Фильтрация по продукту
     - Сортировка по всем полям
-10. Production manager controller:
-10.1  Управление ингредиентами
+[X] 10. Production manager controller:
+[X] 10.1  Управление ингредиентами
   - | name | quantity |
   - Может добавлять/редактировать записи
-10.2  Управление рецептами
+[X] 10.2  Управление рецептами
   - | Product name | Ingredient | quantity on storage | quantity per recipe |
   - CRUD
   - Фильтрация по ингредиентами/продуктам
   - Сортировка по всем полям
-10.3  Управление продукцией
+[X] 10.3  Управление продукцией
   - | Product name | Productm count |
   - Может изменить количество продукта
-10.4  Управление производственным планом
+[X]10.4  Управление производственным планом
   - | Product name | date | quantity |
   - Фильтрация по диапазону дат/продукту
   - Сортировка по всем полям
 
-11. Affiliate manager controller:
-11.1  Управление ассортиментом
+[X] 11. Affiliate manager controller:
+[X]11.1  Управление ассортиментом
   - | Product name | quantity | price | daily delivery |
   - Фильтрация по имени продукта
   - Сортировка по всем полям
   - Может полностью редактировать таблицу
   - Может добавить только отсутствующий продукт
-11.2  Управление движением товара
+[X] 11.2  Управление движением товара
   - | Product name | Date(always TODAY) | realised_count | recieved_count |
   - Фильтрация по имени продукта
   - Сортировка по всем полям
   - Почти все перехватывается триггерами: добавление записи прибавляется к прошлой, стоимостная оценка считается автоматически
   - Доступны только INSERT (POST)
 
-12. Logist controller:
-12.1  Просмотр дневных поставок
+[X] 12. Logist controller:
+[X] 12.1  Просмотр дневных поставок
   - | Affilaite adress | contact number | product | quantity |
   - Формируется путем исключения доставок assortiment_daily  из product_movement 
   - Может отмечать заказ как доставленный (вызывает процедуру)
-12.2  Просмотр заказов
+[X] 12.2  Просмотр заказов
   - | Partner firmname | partner adress | contact number | product | quantity | Date | 
   - Только записи с статусом IN_STORAGE/BEING_DELIEVERED
   - Может менять статус заказа на BEING_DELIEVERED/DELIEVERED
 
-13. Partner controller:
-13.1  Заказы
+[X] 13. Partner controller:
+[X] 13.1  Заказы
   - Учитывает id партнера
   - | Product | Date | quantity | Cost | Status |
   - На стадии RECIEVED|PROCESSING может быть отменен\изменен
   - Сортировка по всем полям
   - Фильтрация по диапазону дат, имени продукта и статусу
 
-14. Supplier controller:
-14.1  Доставки
+[X] 14. Supplier controller:
+[X] 14.1  Доставки
   - Учитывает id поставщика
   - | Product | date | quantity | Cost |
   - Сортировка по всем полям

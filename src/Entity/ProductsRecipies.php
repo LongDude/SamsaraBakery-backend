@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductsRecipiesRepository;
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;  
 #[ORM\Entity(repositoryClass: ProductsRecipiesRepository::class)]
 class ProductsRecipies
 {
@@ -21,8 +21,9 @@ class ProductsRecipies
     #[ORM\JoinColumn(nullable: false)]
     private ?Ingredients $ingredient_id = null;
 
-    #[ORM\Column(type: 'float', options: ['default' => 0])]
-    private float $quantity = 0;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $quantity = 0;
 
     public function getId(): ?int
     {
@@ -53,12 +54,12 @@ class ProductsRecipies
         return $this;
     }
 
-    public function getQuantity(): float
+    public function getQuantity(): ?int
     {
         return $this->quantity;
     }
 
-    public function setQuantity(float $quantity): static
+    public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
 

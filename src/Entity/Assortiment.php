@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\AssortimentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AssortimentRepository::class)]
 class Assortiment
@@ -17,14 +18,17 @@ class Assortiment
     #[ORM\JoinColumn(nullable: false)]
     private ?Products $product = null;
 
-    #[ORM\Column]
-    private ?float $quantity = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $quantity = 0;
 
-    #[ORM\Column]
-    private ?float $price = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?float $price = 0;
 
-    #[ORM\Column]
-    private ?int $daily_delivery = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $daily_delivery = 0;
 
     #[ORM\ManyToOne(inversedBy: 'assortiments')]
     private Affiliates $affiliate;
@@ -46,12 +50,12 @@ class Assortiment
         return $this;
     }
 
-    public function getQuantity(): ?float
+    public function getQuantity(): ?int
     {
         return $this->quantity;
     }
 
-    public function setQuantity(float $quantity): static
+    public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
 

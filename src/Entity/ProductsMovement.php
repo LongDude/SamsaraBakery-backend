@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ProductsMovementRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductsMovementRepository::class)]
 class ProductsMovement
@@ -22,17 +23,21 @@ class ProductsMovement
     #[ORM\JoinColumn(nullable: false)]
     private ?Products $product = null;
 
-    #[ORM\Column]
-    private ?float $realised_price = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?float $realised_price = 0;
 
-    #[ORM\Column]
-    private ?int $realised_count = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $realised_count = 0;
 
-    #[ORM\Column]
-    private ?float $recieved_cost = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?float $recieved_cost = 0;
 
-    #[ORM\Column]
-    private ?int $recieved_count = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $recieved_count = 0;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $date = null;
@@ -83,7 +88,7 @@ class ProductsMovement
         return $this->realised_count;
     }
 
-    public function setRealisedCount(float $realised_count): static
+    public function setRealisedCount(int $realised_count): static
     {
         $this->realised_count = $realised_count;
 

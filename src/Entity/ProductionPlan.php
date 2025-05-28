@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ProductionPlanRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductionPlanRepository::class)]
 class ProductionPlan
@@ -17,8 +18,9 @@ class ProductionPlan
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $date = null;
 
-    #[ORM\Column]
-    private ?int $quantity = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $quantity = 0;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]

@@ -6,6 +6,7 @@ use App\Enum\OrderStatus;
 use App\Repository\OrdersRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrdersRepository::class)]
 class Orders
@@ -23,11 +24,13 @@ class Orders
     #[ORM\JoinColumn(nullable: false)]
     private ?Products $product = null;
 
-    #[ORM\Column]
-    private ?float $price = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?float $price = 0;
 
-    #[ORM\Column]
-    private ?int $quantity = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private ?int $quantity = 0;
 
     #[ORM\Column(enumType: OrderStatus::class)]
     private ?OrderStatus $status = OrderStatus::RECIEVED;

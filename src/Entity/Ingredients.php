@@ -6,6 +6,7 @@ use App\Repository\IngredientsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: IngredientsRepository::class)]
 class Ingredients
@@ -16,7 +17,8 @@ class Ingredients
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?float $quantity = null;
+    #[Assert\PositiveOrZero]
+    private ?int $quantity = 0;
 
     #[ORM\Column(length: 128)]
     private ?string $name = null;
