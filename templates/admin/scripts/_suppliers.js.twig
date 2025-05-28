@@ -1,10 +1,15 @@
-  (function() {
+(function() {
   const penIcon = `<i class="bi bi-pencil"></i>`;
   const trashIcon = `<i class="bi bi-trash"></i>`;
   const editIcon = `<i class="bi bi-pencil-square"></i>`;
 
   function editableFormatter(value, row, index, field) {
     return `<span class="editable-span" data-field="${field}" style="cursor:pointer;">${value}${penIcon}</span>`;
+  }
+
+  function representativeFormatter(value, row, index) {
+    const repNames = value.map(rep => rep.username + ' (' + rep.email + ')').join(', ');
+    return `<span class="representatives-editable-span" data-field="representatives" style="cursor:pointer;">${repNames}${penIcon}</span>`;
   }
 
   function actionFormatter(value, row, index) {
@@ -43,6 +48,14 @@
           }
         },
         {
+          field: 'representatives',
+          title: 'Представители',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return representativeFormatter(value, row, index);
+          }
+        },
+        {
           field: 'contact_number',
           title: 'Телефон',
           sortable: true,
@@ -50,7 +63,6 @@
             return editableFormatter(value, row, index, 'contact_number');
           }
         },
-        // ДОБАВЛЯЕМ КОЛОНКУ ДЕЙСТВИЙ
         {
           field: 'actions',
           title: 'Действия',
@@ -83,7 +95,7 @@
       }
     });
 
-    // Кнопка "Добавить товар"
+    // Модальное окно добавления
     const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
     $('#add-item-btn').on('click', function() {
       $('#itemModalLabel').text('Добавить поставщика');
@@ -91,10 +103,11 @@
       $('#item-firmname').val('');
       $('#item-address').val('');
       $('#item-contact_number').val('');
+      $('#item-representatives').val(null).trigger('change');
       itemModal.show();
     });
 
-    // Кнопка "Редактировать" (в модальном)
+    // Модальное окно редактирования
     $(document).on('click', '.edit-row', function() {
       const supplierId = $(this).data('id');
       const row = $('#dynamic-table').bootstrapTable('getData').find(r => r.id == supplierId);
@@ -104,17 +117,27 @@
       $('#item-firmname').val(row.firmname);
       $('#item-address').val(row.address);
       $('#item-contact_number').val(row.contact_number);
+      // Поле с перечислением
+      $('#item-representatives').val(null).trigger('change');
+      if (row.representatives && row.representatives.length > 0) {
+        row.representatives.forEach(function(rep) {
+          const option = new Option(rep.username + ' (' + rep.email + ')', rep.id, true, true);
+          $('#item-representatives').append(option);
+        });
+      }
+      $('#item-representatives').trigger('change');
       itemModal.show();
     });
 
-    // Сохранить (добавить или обновить)
+    // Сохранить модальное окно
     $('#item-form').on('submit', function(e) {
       e.preventDefault();
       const id = $('#item-id').val();
       const data = {
         firmname: $('#item-firmname').val(),
         address: $('#item-address').val(),
-        contact_number: $('#item-contact_number').val()
+        contact_number: $('#item-contact_number').val(),
+        representatives: $('#item-representatives').val() || []
       };
       let url, type;
       if (id) {
@@ -157,7 +180,7 @@
       });
     });
 
-    // Оставляем инлайн-редактирование, если нужно
+    // Инлайн-редактирование
     $(document).on('click', '.editable-span', function() {
       const $span = $(this);
       const value = $span.text().replace(/[\u{1F58A}-\u{1F58C}]|<svg[\s\S]*?<\/svg>/gu, '').trim();
@@ -169,17 +192,8 @@
       );
       $('.editable-input').focus();
     });
-
-    $(document).on('blur', '.editable-input', function() {
-      saveEdit($(this));
-    });
-    $(document).on('keydown', '.editable-input', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        $(this).blur();
-      }
-    });
-
+    
+    // Сохранение изменений в другие поля
     function saveEdit($input) {
       const newValue = $input.val();
       const field = $input.data('field');
@@ -207,5 +221,114 @@
 
       $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
     }
+
+    // Инициализация select2 для представителей
+    $('#item-representatives').select2({
+      width: '100%',
+      placeholder: 'Выберите представителей',
+      allowClear: true,
+      multiple: true,
+      ajax: {
+        delay: 250,
+        url: function() {
+          const id = $('#item-id').val() || 0;
+          return `{{ path('api_admin_suppliers_search_representatives', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        },
+        dataType: 'json',
+        data: function(params) {
+          return { q: params.term };
+        },
+        processResults: function(data) {
+          return { results: data };
+        },
+        cache: true
+      },
+      dropdownParent: $('#itemModal')
+    });
+
+    // Инлайн-редактирование представителей
+    $(document).on('click', '.representatives-editable-span', function() {
+      const $span = $(this);
+      const $tr = $span.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      // Формируем select с текущими значениями
+      let selectHtml = `<select class="form-control editable-representatives-select" multiple style="width: 100%; display:inline;"></select>`;
+      $span.replaceWith(selectHtml);
+      const $select = $('.editable-representatives-select');
+      // Добавляем текущих представителей
+      if (rowData.representatives && rowData.representatives.length > 0) {
+        rowData.representatives.forEach(function(rep) {
+          const option = new Option(rep.username + ' (' + rep.email + ')', rep.id, true, true);
+          $select.append(option);
+        });
+      }
+      $select.select2({
+        width: '100%',
+        placeholder: 'Выберите представителей',
+        allowClear: true,
+        multiple: true,
+        ajax: {
+          delay: 250,
+          url: function() {
+            const id = rowData.id;
+            return `{{ path('api_admin_suppliers_search_representatives', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+          },
+          dataType: 'json',
+          data: function(params) {
+            return { q: params.term };
+          },
+          processResults: function(data) {
+            return { results: data };
+          },
+          cache: true
+        },
+        dropdownParent: $tr
+      }).select2('open');
+      $select.on('select2:close', function() {
+        saveRepresentativesEdit($select, rowIndex);
+      });
+      $select.on('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          $select.blur();
+        }
+      });
+    });
+
+    // Сохранение изменений в представителях
+    function saveRepresentativesEdit($select, rowIndex) {
+      const newIds = $select.val() || [];
+      const $tr = $select.closest('tr');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const supplierId = rowData.id;
+      const url = `{{ path('api_admin_suppliers_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', supplierId);
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({ representatives: newIds }),
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при обновлении представителей!');
+        }
+      });
+      // Отображаем выбранные значения сразу (без ожидания refresh)
+      const selectedData = $select.select2('data');
+      const repNames = selectedData.map(rep => rep.text).join(', ');
+      $select.replaceWith(`<span class="representatives-editable-span" data-field="representatives" style="cursor:pointer;">${repNames}${penIcon}</span>`);
+    }
+
+    $(document).on('blur', '.editable-input', function() {
+      saveEdit($(this));
+    });
+    $(document).on('keydown', '.editable-input', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $(this).blur();
+      }
+    });
   });
 })();

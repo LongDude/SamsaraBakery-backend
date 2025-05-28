@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Partners;
 use App\Repository\PartnersRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -47,6 +48,13 @@ class AdminPartnersController extends AbstractController
                 'firmname' => $partners->getFirmname(),
                 'address' => $partners->getAddress(),
                 'contact_number' => $partners->getContactNumber(),
+                'representatives' => array_map(function($u) {
+                    return [
+                        'id' => $u->getId(),
+                        'username' => $u->getUsername(),
+                        'email' => $u->getEmail(),
+                    ];
+                }, $partners->getRepresentatives()->toArray()),
             ];
         }, $partners);
 
@@ -57,7 +65,7 @@ class AdminPartnersController extends AbstractController
     }
 
     #[Route('', name: 'api_admin_partners_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -65,7 +73,14 @@ class AdminPartnersController extends AbstractController
         $partner->setFirmname($data['firmname']);
         $partner->setAddress($data['address']);
         $partner->setContactNumber($data['contact_number']);
-
+        if (!empty($data['representatives']) && is_array($data['representatives'])) {
+            foreach ($data['representatives'] as $userId) {
+                $user = $userRepository->find($userId);
+                if ($user) {
+                    $partner->addRepresentative($user);
+                }
+            }
+        }
         $entityManager->persist($partner);
         $entityManager->flush();
 
@@ -76,7 +91,7 @@ class AdminPartnersController extends AbstractController
     }
 
     #[Route('/{id}', name: 'api_admin_partners_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, PartnersRepository $partnersRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function update(int $id, Request $request, PartnersRepository $partnersRepository, EntityManagerInterface $entityManager, UserRepository $userRepository): JsonResponse
     {
         $partner = $partnersRepository->find($id);
         if (!$partner) {
@@ -94,7 +109,19 @@ class AdminPartnersController extends AbstractController
         if (isset($data['contact_number'])) {
             $partner->setContactNumber($data['contact_number']);
         }
-
+        if (isset($data['representatives']) && is_array($data['representatives'])) {
+            // Сбросить старых представителей
+            foreach ($partner->getRepresentatives() as $oldRep) {
+                $partner->removeRepresentative($oldRep);
+            }
+            // Добавить новых
+            foreach ($data['representatives'] as $userId) {
+                $user = $userRepository->find($userId);
+                if ($user) {
+                    $partner->addRepresentative($user);
+                }
+            }
+        }
         $entityManager->flush();
 
         return $this->json(['success' => true]);
@@ -112,5 +139,39 @@ class AdminPartnersController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['success' => true]);
+    }
+
+    #[Route('/{id}/search_representatives', name: 'api_admin_partners_search_representatives', methods: ['GET'])]
+    public function searchRepresentatives(int $id, Request $request, PartnersRepository $partnersRepository, UserRepository $userRepository): JsonResponse
+    {
+        $search = $request->query->get('q', '');
+        $partner = $partnersRepository->find($id);
+        $assigned = [];
+        if ($partner) {
+            $assigned = $partner->getRepresentatives()->map(fn($u) => $u->getId())->toArray();
+        }
+        $qb = $userRepository->createQueryBuilder('u');
+        if ($assigned) {
+            $qb->where($qb->expr()->notIn('u.id', ':assigned'));
+            $qb->setParameter('assigned', $assigned);
+        }
+        if ($search) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('u.Username', ':search'),
+                    $qb->expr()->like('u.email', ':search')
+                )
+            );
+            $qb->setParameter('search', "%$search%");
+        }
+        $qb->orderBy('u.Username', 'asc')->setMaxResults(10);
+        $users = $qb->getQuery()->getResult();
+        $data = array_map(function($user) {
+            return [
+                'id' => $user->getId(),
+                'text' => ($user->getUsername() ?? '').' ('.$user->getEmail().')',
+            ];
+        }, $users);
+        return $this->json($data);
     }
 } 

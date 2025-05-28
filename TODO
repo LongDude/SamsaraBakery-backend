@@ -49,19 +49,8 @@ Administrator:
 - Product Movement (affiliate_id, product_id)
 - Ingredient Products (ingredient_id, product_id)
 - deliveries (supplier_id, product_id)
-- Supplier Representatives (user_id, supplier_id)
-- Orders (product_id, partner_id)
-- partners representatives (user_id, partner_id)
 - Production plan (product_id)
-
-- AdminAssortimentController              admin_view_assortiment
-- AdminProductMovementController          admin_view_product_movement
-- AdminProductsRecipiesController       admin_view_products_recipies
-- AdminDeliveriesController               admin_view_deliveries
-- AdminSupplierRepresentativesController  admin_view_supplier_representatives
-- AdminProductionPlanController           admin_view_production_plan
-- AdminOrdersController                   admin_view_orders
-- AdminPartnerRepresentatinvesController  admin_view_partners_representatives
+- Orders (product_id, partner_id)
 
 - DirectorOrdersController            director_orders
 - DirectorAffiliatesController        director_affiliates
