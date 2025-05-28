@@ -82,6 +82,38 @@ class AdminUsersController extends AbstractController
         ]);
     }
 
+
+    #[Route('/search', name: 'api_admin_users_search', methods: ['GET'])]
+    public function search(Request $request, UserRepository $userRepository): JsonResponse
+    {
+        $search = $request->query->get('search', '');
+        $limit = $request->query->getInt('limit', 10);
+        $offset = $request->query->getInt('offset', 1);
+        $sort = $request->query->get('sort', 'id');
+        $order = $request->query->get('order', 'asc');
+
+        $qb = $userRepository->createQueryBuilder('u');
+        if ($search) {
+            $qb->where('u.email LIKE :search')
+               ->orWhere('u.username LIKE :search')
+               ->orWhere('u.phone LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        $qb->orderBy('u.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $users = $qb->getQuery()->getResult();
+
+        $data = array_map(function($user) {
+            return [
+                'label' => ($user->getUsername() ?? '')."(".$user->getEmail().")",
+                'value' => $user->getUsername(),
+                'email' => $user->getEmail(),
+            ];
+        }, $users);
+        return $this->json($data);
+    }
+
     #[Route('/{id}', name: 'api_admin_users_update', methods: ['PUT'])]
     public function update(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {

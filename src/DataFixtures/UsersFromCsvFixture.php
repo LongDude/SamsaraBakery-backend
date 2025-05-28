@@ -5,9 +5,17 @@ namespace App\DataFixtures;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UsersFromCsvFixture extends Fixture
+
 {
+    private UserPasswordHasherInterface $passwordHasher;
+
+public function __construct(UserPasswordHasherInterface $passwordHasher)
+{
+    $this->passwordHasher = $passwordHasher;
+}
     public function load(ObjectManager $manager): void
     {
         $csvFile = __DIR__ . '/Data/users.csv'; // путь к вашему CSV
@@ -31,7 +39,7 @@ class UsersFromCsvFixture extends Fixture
             $user = new User();
             $user->setEmail($row['email']);
             $user->setRoles([$row['roles']]);
-            $user->setPassword($row['password']);
+            $user->setPassword($this->passwordHasher->hashPassword($user, $row['password']));
             $user->setPhone($row['phone']);
             $user->setUsername($row['username']);
 

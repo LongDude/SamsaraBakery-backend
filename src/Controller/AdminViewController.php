@@ -82,4 +82,18 @@ class AdminViewController extends AbstractController
         $response->headers->set('Content-Type', 'application/javascript');
         return $response;
     }
+
+    #[Route('/affiliates', name: 'affiliates')]
+    public function adminViewAffiliates(): Response
+    {
+        return $this->render('admin/tables/_affiliates.html.twig', []);
+    }
+
+    #[Route('/affiliates/js', name: 'affiliates_js')]
+    public function adminViewAffiliatesJs(): Response
+    {
+        $response = $this->render('admin/scripts/_affiliates.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
 } 

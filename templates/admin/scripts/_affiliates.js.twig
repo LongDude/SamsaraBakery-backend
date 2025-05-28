@@ -1,0 +1,303 @@
+  (function() {
+  const penIcon = `<i class="bi bi-pencil"></i>`;
+  const trashIcon = `<i class="bi bi-trash"></i>`;
+  const editIcon = `<i class="bi bi-pencil-square"></i>`;
+
+  function editableFormatter(value, row, index, field) {
+    return `<span class="editable-span" data-field="${field}" style="cursor:pointer;">${value}${penIcon}</span>`;
+  }
+
+  function actionFormatter(value, row, index) {
+    return `
+      <button type="button" class="btn btn-sm btn-outline-primary edit-row" data-id="${row.id}" title="Редактировать">${editIcon}</button>
+      <button type="button" class="btn btn-sm btn-outline-danger delete-row" data-id="${row.id}" title="Удалить">${trashIcon}</button>
+    `;
+  }
+
+  function editableManagerFormatter(value, row, index) {
+    // value — имя менеджера
+    return `<span class="editable-manager-span" data-email="${row.managerEmail || ''}" style="cursor:pointer;">${value}${penIcon}</span>`;
+  }
+
+  $(document).ready(function() {
+    $('#dynamic-table').bootstrapTable({
+      search: true,
+      pagination: true,
+      pageList: [10, 25, 50, 100, "All"],
+      sidePagination: 'server',
+      columns: [
+        {
+          field: 'id',
+          title: 'ID',
+          sortable: true,
+        },
+        {
+          field: 'address',
+          title: 'Адрес',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'address');
+          }
+        },
+        {
+          field: 'contact_number',
+          title: 'Контактный номер',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'contact_number');
+          }
+        },
+        {
+          field: 'manager',
+          title: 'Менеджер',
+          sortable: true,
+          formatter: editableManagerFormatter
+        },
+        // ДОБАВЛЯЕМ КОЛОНКУ ДЕЙСТВИЙ
+        {
+          field: 'actions',
+          title: 'Действия',
+          align: 'center',
+          clickToSelect: false,
+          formatter: actionFormatter
+        }
+      ],
+
+      url: `{{ path('api_admin_affiliates_list') }}`,
+      method: 'GET',
+      contentType: 'application/json',
+
+      showFooter: true, 
+      showColumns: true,
+      showRefresh: true,
+      showToggle: true,
+      showFullscreen: true,
+
+      responseHandler: function(res) {
+        return {
+          total: res.totalElements,
+          rows: res.content
+        };
+      },
+
+      onLoadError: function(status, jqXHR) {
+        console.error('Error loading data:', status, jqXHR);
+        alert('Error loading data. Please try again.');
+      }
+    });
+
+    // Кнопка "Добавить филиал"
+    const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+    $('#add-item-btn').on('click', function() {
+      $('#itemModalLabel').text('Добавить филиал');
+      $('#item-id').val('');
+      $('#item-address').val('');
+      $('#item-contact_number').val('');
+      $('#item-manager').val('');
+      itemModal.show();
+    });
+
+    // Кнопка "Редактировать" (в модальном)
+    $(document).on('click', '.edit-row', function() {
+      const affiliateId = $(this).data('id');
+      const row = $('#dynamic-table').bootstrapTable('getData').find(r => r.id == affiliateId);
+      if (!row) return;
+      $('#itemModalLabel').text('Редактировать филиал');
+      $('#item-id').val(row.id);
+      $('#item-address').val(row.address);
+      $('#item-contact_number').val(row.contact_number);
+      $('#item-manager').val(row.manager);
+      itemModal.show();
+    });
+
+    // Сохранить (добавить или обновить)
+    $('#item-form').on('submit', function(e) {
+      e.preventDefault();
+      const id = $('#item-id').val();
+      const data = {
+        address: $('#item-address').val(),
+        contact_number: $('#item-contact_number').val(),
+        manager: $('#item-manager').val()
+      };
+      let url, type;
+      if (id) {
+        url = `{{ path('api_admin_affiliates_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        type = 'PUT';
+      } else {
+        url = `{{ path('api_admin_affiliates_create') }}`;
+        type = 'POST';
+      }
+      $.ajax({
+        url: url,
+        type: type,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+          itemModal.hide();
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при сохранении!');
+        }
+      });
+    });
+
+    // Удаление строки
+    $(document).on('click', '.delete-row', function() {
+      if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
+      const affiliateId = $(this).data('id');
+      const url = `{{ path('api_admin_affiliates_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', affiliateId);
+
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при удалении!');
+        }
+      });
+    });
+
+    // Оставляем инлайн-редактирование, если нужно
+    $(document).on('click', '.editable-span', function() {
+      const $span = $(this);
+      const value = $span.text().replace(/[\u{1F58A}-\u{1F58C}]|<svg[\s\S]*?<\/svg>/gu, '').trim();
+      const field = $span.data('field');
+      let inputType = 'text';
+      let step = '';
+      $span.replaceWith(
+        `<input type="${inputType}" class="form-control editable-input" data-field="${field}" value="${value}" ${step} style="width: 100%; display:inline;">`
+      );
+      $('.editable-input').focus();
+    });
+
+    $(document).on('blur', '.editable-input', function() {
+      saveEdit($(this));
+    });
+    $(document).on('keydown', '.editable-input', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $(this).blur();
+      }
+    });
+
+    function saveEdit($input) {
+      const newValue = $input.val();
+      const field = $input.data('field');
+      const $tr = $input.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const affiliateId = rowData.id;
+      const url = `{{ path('api_admin_affiliates_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', affiliateId);
+
+      let data = {};
+      data[field] = newValue;
+
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при обновлении!');
+        }
+      });
+
+      $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
+    }
+     $(document).on('click', '.editable-manager-span', function() {
+      const $span = $(this);
+      const value = $span.text().trim();
+      const $tr = $span.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+
+      // Вставляем input для поиска
+      $span.replaceWith(
+        `<input type="text" class="form-control editable-manager-input" value="${value}" style="width: 200px; display:inline;">`
+      );
+      const $input = $('.editable-manager-input');
+      $input.focus();
+
+      // Инициализация autocomplete
+      $input.autocomplete({
+        minLength: 2,
+        source: function(request, response) {
+          // AJAX-запрос на сервер для поиска пользователей
+          $.ajax({
+            url: `{{ path('api_admin_users_search') }}`, // ваш эндпоинт поиска
+            data: { q: request.term },
+            success: function(data) {
+              // data — массив объектов: [{label: "Имя (email)", value: "Имя", email: "email"}]
+              response(data);
+            }
+          });
+        },
+        select: function(event, ui) {
+          // При выборе из списка
+          $input.data('selected-email', ui.item.email);
+        }
+      });
+
+      // При потере фокуса или Enter — сохраняем
+      $input.on('blur', function() {
+        saveManagerEdit($input, rowIndex);
+      });
+      $input.on('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          $input.blur();
+        }
+      });
+    });
+
+    function saveManagerEdit($input, rowIndex) {
+      const selectedEmail = $input.data('selected-email');
+      const displayName = $input.val();
+      if (!selectedEmail) {
+        // Если пользователь не выбрал из списка — делаем повторный поиск и берём первый результат
+        $.ajax({
+          url: `{{ path('api_admin_users_search') }}`,
+          data: { q: displayName },
+          success: function(data) {
+            if (data && data.length > 0) {
+              sendManagerUpdate(data[0].email, data[0].value, $input, rowIndex);
+            } else {
+              // Нет подходящих — возвращаем span с прежним значением
+              $input.replaceWith(`<span class="editable-manager-span" style="cursor:pointer;">${displayName}${penIcon}</span>`);
+            }
+          }
+        });
+      } else {
+        sendManagerUpdate(selectedEmail, displayName, $input, rowIndex);
+      }
+    }
+
+    function sendManagerUpdate(email, displayName, $input, rowIndex) {
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const id = rowData.id;
+      const url = `{{ path('api_admin_affiliates_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({ managerEmail: email }),
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при обновлении менеджера!');
+        }
+      });
+
+      // Возвращаем span с именем
+      $input.replaceWith(`<span class="editable-manager-span" data-email="${email}" style="cursor:pointer;">${displayName}${penIcon}</span>`);
+    }
+  });
+})();
