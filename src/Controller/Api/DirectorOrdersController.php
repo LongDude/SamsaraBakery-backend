@@ -71,7 +71,7 @@ class DirectorOrdersController extends AbstractController
                 'price' => $order->getPrice(),
                 'quantity' => $order->getQuantity(),
                 'status' => $order->getStatus(),
-                'date' => $order->getDate()->format('Y-m-d'),
+                'date' => $order->getDate()->format('d-m-Y'),
             ];
         }, $orders);
 
@@ -193,7 +193,7 @@ class DirectorOrdersController extends AbstractController
             'price' => $order->getPrice(),
             'quantity' => $order->getQuantity(),
             'status' => $order->getStatus(),
-            'date' => $order->getDate()->format('Y-m-d'),
+            'date' => $order->getDate()->format('d-m-Y'),
         ];
         }, $orders);
 
@@ -249,7 +249,7 @@ class DirectorOrdersController extends AbstractController
             'price' => $order->getPrice(),
             'quantity' => $order->getQuantity(),
             'status' => $order->getStatus(),
-            'date' => $order->getDate()->format('Y-m-d'),
+            'date' => $order->getDate()->format('d-m-Y'),
         ];
         }, $orders);
 

@@ -1,0 +1,145 @@
+
+  (function() {
+
+  let dateFromFilter = '';
+  let dateToFilter = '';
+
+  $(document).ready(function() {
+    $('#dynamic-table').bootstrapTable({
+      search: true,
+      pagination: true,
+      pageList: [10, 25, 50, 100, "All"],
+      sidePagination: 'server',
+      columns: [
+        {
+          field: 'affiliate_id',
+          title: 'ID',
+          sortable: true,
+          visible: false,
+        },
+        {
+          field: 'affiliate_address',
+          title: 'Филиал',
+          sortable: true,
+        },
+        {
+          field: 'contact_number',
+          title: 'Контактный номер',
+          sortable: true,
+        },
+        {
+          field: 'manager_name',
+          title: 'Менеджер',
+          sortable: true,
+        },
+        {
+          field: 'manager_phone',
+          title: 'Телефон менеджера',
+          sortable: true,
+        },
+        {
+          field: 'day',
+          title: 'Дата <button type="button" class="btn btn-sm btn-outline-secondary ms-1 date-filter-btn" title="Фильтр"><i class="bi bi-funnel"></i></button>',
+          sortable: true,
+        },
+        {
+          field: 'revenue',
+          title: 'Выручка',
+          sortable: true,
+        },
+        {
+          field: 'cost',
+          title: 'Расходы',
+          sortable: true,
+        },
+        {
+          field: 'net_revenue',
+          title: 'Чистая прибыль',
+          sortable: true,
+        },
+      ],
+
+      url: `{{ path('api_director_affiliates_finance_list') }}`,
+      method: 'GET',
+      contentType: 'application/json',
+
+      showFooter: true, 
+      showColumns: true,
+      showRefresh: true,
+      showToggle: true,
+      showFullscreen: true,
+
+      responseHandler: function(res) {
+        return {
+          total: res.totalElements,
+          rows: res.content
+        };
+      },
+
+      onLoadError: function(status, jqXHR) {
+        console.error('Error loading data:', status, jqXHR);
+        alert('Error loading data. Please try again.');
+      },
+
+      queryParams: function(params) {
+        params.date_from = dateFromFilter;
+        params.date_to = dateToFilter;
+        // Для отладки
+        console.log('queryParams:', params);
+        return params;
+      }
+    });
+
+
+    $(document).on('click', '.date-filter-btn', function() {
+      $('#dateFilterModal').modal('show');
+    });
+    $('#apply-date-filter-btn').on('click', function() {
+      // Здесь логика применения фильтра и обновления таблицы
+      // Например:
+      dateFromFilter = $('#date-from').val();
+      dateToFilter = $('#date-to').val();
+      $('#dateFilterModal').modal('hide');
+      $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+    });
+
+    // Кнопка фильтра по статусу
+    $(document).on('click', '.status-filter-btn', function() {
+      $('#statusFilterModal').modal('show');
+    });
+    $('#apply-status-filter-btn').on('click', function() {
+      statusFilter = $('#status-filter-select').val();
+      $('#statusFilterModal').modal('hide');
+      $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+    });
+
+    // Обработчик кнопки скачивания CSV-отчёта с учётом фильтров, поиска и сортировки
+    $('#download-excel-btn').on('click', function() {
+      // Получаем параметры фильтрации, поиска и сортировки
+      const tableOpts = $('#dynamic-table').bootstrapTable('getOptions');
+      const params = {
+        date_from: dateFromFilter,
+        date_to: dateToFilter,
+        search: tableOpts.searchText || '',
+        sort: tableOpts.sortName || '',
+        order: tableOpts.sortOrder || ''
+      };
+      const query = $.param(params);
+      window.open(`{{ path('api_director_affiliates_finance_report_excel') }}?${query}`, '_blank');
+    });
+
+    // Обработчик кнопки скачивания PDF-отчёта с учётом фильтров, поиска и сортировки
+    $('#download-pdf-btn').on('click', function() {
+      const tableOpts = $('#dynamic-table').bootstrapTable('getOptions');
+      const params = {
+        date_from: dateFromFilter,
+        date_to: dateToFilter,
+        search: tableOpts.searchText || '',
+        sort: tableOpts.sortName || '',
+        order: tableOpts.sortOrder || ''
+      };
+      const query = $.param(params);
+      window.open(`{{ path('api_director_affiliates_finance_report_pdf') }}?${query}`, '_blank');
+    });
+  });
+})();

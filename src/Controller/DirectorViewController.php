@@ -26,4 +26,18 @@ class DirectorViewController extends AbstractController
         $response->headers->set('Content-Type', 'application/javascript');
         return $response;
     }
+
+    #[Route('/affiliates_finance', name: 'affiliates_finance')]
+    public function directorViewAffiliatesFinance(): Response
+    {
+        return $this->render('director/_director_affiliates_finance.html.twig', []);
+    }
+
+    #[Route('/affiliates_finance/js', name: 'affiliates_finance_js')]
+    public function directorViewAffiliatesFinanceJs(): Response
+    {
+        $response = $this->render('director/_director_affiliates_finance.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
 }
