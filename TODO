@@ -1,22 +1,22 @@
-[X] 1. Assortiment (affiliate_id, product_id, quantity, price, daily_delivery)
-[X] 2. Product Movement (affiliate_id, product_id, realised_price, realised_count, recieved_cost, recieved_count, date)
-[X] 3. Recipes (ingredient_id, product_id, quantity)
-[X] 4. Production plan (product_id, date, quantity)
-[X] 5. Deliveries (supplier_id, product_id, quantity, price, date, status)
-[X] 6. Orders (partner_id, product_id, quantity, price, date, status)
-7. Database objects:
-7.1  Procedure 1 - доставка товара:
+[-] 1. Assortiment (affiliate_id, product_id, quantity, price, daily_delivery)
+[-] 2. Product Movement (affiliate_id, product_id, realised_price, realised_count, recieved_cost, recieved_count, date)
+[-] 3. Recipes (ingredient_id, product_id, quantity)
+[-] 4. Production plan (product_id, date, quantity)
+[-] 5. Deliveries (supplier_id, product_id, quantity, price, date, status)
+[-] 6. Orders (partner_id, product_id, quantity, price, date, status)
+[X] 7. Database objects:
+[X] 7.1  Procedure 1 - доставка товара:
     - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
     - Обновляет Product movenemt новой записью/обновление текущей
     - Обновляет Assortiment данными (иначе процедура обваливается)
     - Обновляет склад (иначе процедура обваливается)
-7.2  Procedure 2 - продажа товара:
+[X] 7.2  Procedure 2 - продажа товара:
     - Обновление движения товара (affiliate id, product id, count_recieved, count_sold)
     - Обновляет Product movenemt новой записью/обновление текущей
     - Обновляет Assortiment данными (иначе процедура обваливается)
-7.3  Trigger 1: Автоматическое обновление выручки за сутки (филиал)
-7.4  Trigger 2: Обновление статуса поставки
-7.5  Trigger 3: Обновление статуса заказа
+[X] 7.3  Trigger 1: Автоматическое обновление выручки за сутки (филиал)
+[+-] 7.4  Trigger 2: Обновление статуса поставки
+[+-] 7.5  Trigger 3: Обновление статуса заказа
 7.6  View 1: Список заказов  
 7.7  View 2: Филиалы с выручкой за период
 7.8  View 3: Отчет о продажах
