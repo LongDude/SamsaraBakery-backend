@@ -29,15 +29,17 @@ class AdminIngredientsController extends AbstractController
             $qb->where('i.name LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-        $qb->orderBy('i.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $ingredients = $qb->getQuery()->getResult();
-        $totalIngredients = $ingredientsRepository->createQueryBuilder('i')
+
+        $counterQb = clone $qb;
+        $totalIngredients = $counterQb
             ->select('COUNT(i.id)')
             ->getQuery()
             ->getSingleScalarResult();
+
+        $qb->orderBy('i.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $ingredients = $qb->getQuery()->getResult();
 
         $data = array_map(function($ingredients) {
             return [

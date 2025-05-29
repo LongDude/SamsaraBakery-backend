@@ -32,15 +32,17 @@ class AdminUsersController extends AbstractController
                ->orWhere('u.phone LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-        $qb->orderBy('u.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $users = $qb->getQuery()->getResult();
-        $totalUsers = $userRepository->createQueryBuilder('u')
+
+        $counterQb = clone $qb;
+        $totalUsers = $counterQb
             ->select('COUNT(u.id)')
             ->getQuery()
             ->getSingleScalarResult();
+
+        $qb->orderBy('u.' . $sort, $order)
+           ->setMaxResults($limit)
+            ->setFirstResult($offset);
+        $users = $qb->getQuery()->getResult();        
 
         $data = array_map(function($user) {
             return [

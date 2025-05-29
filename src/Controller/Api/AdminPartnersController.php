@@ -32,16 +32,18 @@ class AdminPartnersController extends AbstractController
                ->orWhere('pa.contact_number LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-        $qb->orderBy('pa.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $partners = $qb->getQuery()->getResult();
-        $totalPartners = $partnersRepository->createQueryBuilder('pa')
+
+        $counterQb = clone $qb;
+        $totalPartners = $counterQb
             ->select('COUNT(pa.id)')
             ->getQuery()
             ->getSingleScalarResult();
 
+        $qb->orderBy('pa.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $partners = $qb->getQuery()->getResult();
+        
         $data = array_map(function($partners) {
             return [
                 'id' => $partners->getId(),

@@ -30,15 +30,17 @@ class UserProductsController extends AbstractController
             $qb->where('u.product LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-        $qb->orderBy('u.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $products = $qb->getQuery()->getResult();
-        $totalProducts = $userProductsViewRepository->createQueryBuilder('u')
+
+        $counterQb = clone $qb;
+        $totalProducts = $counterQb
             ->select('COUNT(u.product)')
             ->getQuery()
             ->getSingleScalarResult();
+
+        $qb->orderBy('u.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $products = $qb->getQuery()->getResult();        
 
         $data = array_map(function($user) {
             return [

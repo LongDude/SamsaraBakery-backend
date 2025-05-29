@@ -53,15 +53,17 @@ class DirectorOrdersController extends AbstractController
             $qb->andWhere('o.date <= :date_to')
                ->setParameter('date_to', $dateTo);
         }
-        $qb->orderBy('o.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $orders = $qb->getQuery()->getResult();
-        $totalOrders = $ordersRepository->createQueryBuilder('o')
+
+        $counterQb = clone $qb;
+        $totalOrders = $counterQb
             ->select('COUNT(o.order_id)')
             ->getQuery()
             ->getSingleScalarResult();
+
+        $qb->orderBy('o.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $orders = $qb->getQuery()->getResult();
 
         $data = array_map(function($order) {
             return [

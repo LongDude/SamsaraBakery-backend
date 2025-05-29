@@ -32,16 +32,20 @@ class AdminAffiliatesController extends AbstractController
             $qb->where('a.address LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
+
+        $countQb = clone $qb;
+
+        $totalAffiliates = $countQb
+        ->select('COUNT(a.id)')
+        ->getQuery()
+        ->getSingleScalarResult();
+        
         $qb->orderBy('a.' . $sort, $order)
            ->setMaxResults($limit)
            ->setFirstResult($offset);
         
         $affiliates = $qb->getQuery()->getResult();
-        $totalAffiliates = $affiliatesRepository->createQueryBuilder('a')
-            ->select('COUNT(a.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
+        
         $data = array_map(function($affiliate) {
             return [
                 'id' => $affiliate->getId(),

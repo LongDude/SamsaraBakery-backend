@@ -18,7 +18,7 @@ class Partners
     #[ORM\Column(length: 128)]
     private ?string $firmname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128)]
     private ?string $address = null;
 
     #[ORM\Column(length: 20)]

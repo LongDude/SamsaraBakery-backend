@@ -29,15 +29,17 @@ class DirectorProductionController extends AbstractController
             $qb->where('p.name LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-        $qb->orderBy('p.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $products = $qb->getQuery()->getResult();
-        $totalProducts = $productsRepository->createQueryBuilder('p')
+
+        $counterQb = clone $qb;
+        $totalProducts = $counterQb
             ->select('COUNT(p.id)')
             ->getQuery()
             ->getSingleScalarResult();
+
+        $qb->orderBy('p.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $products = $qb->getQuery()->getResult();        
 
         $data = array_map(function($product) {
             return [

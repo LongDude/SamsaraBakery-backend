@@ -27,6 +27,14 @@
           sortable: true,
         },
         {
+          field: 'name',
+          title: 'Наименование',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'name');
+          }
+        },
+        {
           field: 'quantity_storaged',
           title: 'Количество на складе',
           sortable: true,
@@ -42,15 +50,6 @@
             return editableFormatter(value, row, index, 'production_cost');
           }
         },
-        {
-          field: 'name',
-          title: 'Наименование',
-          sortable: true,
-          formatter: function(value, row, index) {
-            return editableFormatter(value, row, index, 'name');
-          }
-        },
-        // ДОБАВЛЯЕМ КОЛОНКУ ДЕЙСТВИЙ
         {
           field: 'actions',
           title: 'Действия',

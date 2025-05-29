@@ -40,14 +40,14 @@
                         <span>Профиль</span>
                     </a> #}
                     <a href="/logout" class="nav-link">
-                        <i class="fas fa-home"></i>
+                        <i class="bi bi-arrow-return-left"></i>
                         <span>Выйти</span>
                     </a>
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Пользователь</div>
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'user_table_products' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-bag"></i>
                         <span>Продукты</span>
                     </a>
                 </div>
@@ -68,11 +68,11 @@
             {% if is_granted('ROLE_ADMIN') %}
                 <div class="nav-section">
                     <div class="nav-section-title">Админ-панель</div>
-                    {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_affiliates">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_affiliates' )}}">
                         <i class="bi bi-building-fill"></i>
                         <span>Филиалы</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_assortiment">
+                    {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_assortiment">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ассортимент</span>
                     </a>
@@ -81,11 +81,11 @@
                         <span>Движение продукции</span>
                     </a> #}
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_products' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-bag"></i>
                         <span>Продукты</span>
                     </a>
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_ingredients' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-boxes"></i>
                         <span>Ингредиенты</span>
                     </a>
                     {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_products_recipies">
@@ -97,7 +97,7 @@
                         <span>Поставки</span>
                     </a> #}
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_suppliers' )}}">
-                        <i class="bi bi-boxes"></i>
+                        <i class="bi bi-truck"></i>
                         <span>Поставщики</span>
                     </a>
                     {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_production_plan">
@@ -121,19 +121,19 @@
                 <div class="nav-section">
                     <div class="nav-section-title ">Директор</div>
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_orders' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="fas bi-truck"></i>
                         <span>Управление заказами</span>
                     </a>
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_affiliates_finance' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-shop"></i>
                         <span>Управление филиалами</span>
                     </a>
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_products' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-bag"></i>
                         <span>Добавление продукции</span>
                     </a>
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_production_report' )}}">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-file-richtext"></i>
                         <span>Отчет о продажах</span>
                     </a>
                 </div>

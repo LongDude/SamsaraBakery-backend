@@ -32,16 +32,18 @@ class AdminSuppliersController extends AbstractController
                ->orWhere('su.contact_number LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-        $qb->orderBy('su.' . $sort, $order)
-           ->setMaxResults($limit)
-           ->setFirstResult($offset);
-        
-        $suppliers = $qb->getQuery()->getResult();
-        $totalSuppliers = $suppliersRepository->createQueryBuilder('su')
+
+        $counterQb = clone $qb;
+        $totalSuppliers = $counterQb
             ->select('COUNT(su.id)')
             ->getQuery()
             ->getSingleScalarResult();
 
+        $qb->orderBy('su.' . $sort, $order)
+           ->setMaxResults($limit)
+           ->setFirstResult($offset);
+        $suppliers = $qb->getQuery()->getResult();
+        
         $data = array_map(function($suppliers) {
             return [
                 'id' => $suppliers->getId(),

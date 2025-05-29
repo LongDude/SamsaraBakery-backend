@@ -112,3 +112,5 @@
   - | Product | date | quantity | Cost |
   - Сортировка по всем полям
   - Фильтрация по диапазону дат, имени продукта
+
+- PURGING DATABASE ERROR

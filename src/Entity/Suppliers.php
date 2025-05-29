@@ -16,11 +16,11 @@ class Suppliers
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128)]
     #[Assert\NotBlank]
     private ?string $firmname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128)]
     #[Assert\NotBlank]
     private ?string $address = null;
 

@@ -57,8 +57,8 @@ class DirectorAffiliatesFinanceController extends AbstractController
         $countQb->select('COUNT(d.affiliate_id)');
         $totalAffiliates = $countQb->getQuery()->getSingleScalarResult();
         
-        $qb->orderBy('d.' . $sort, $order);
         $data = $qb
+            ->orderBy('d.' . $sort, $order)
             ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()
