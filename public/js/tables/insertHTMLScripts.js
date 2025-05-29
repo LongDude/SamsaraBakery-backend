@@ -1,7 +1,12 @@
-function insertHtmlAndScripts(container, html) {
+function insertHtmlAndScripts(container, header, html) {
     // Создаём временный контейнер для поиска скриптов
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
+
+    let twigHeader = tempDiv.querySelector('#twigHeaderContainer');
+    if (twigHeader) {
+        header.innerHTML = twigHeader.innerHTML;
+    }
 
     let content = tempDiv.querySelector('#twigHTMLContainer');
     if (!content) {

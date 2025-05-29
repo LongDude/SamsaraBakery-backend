@@ -21,7 +21,7 @@
 [X] 7.7  View 2: Филиалы с выручкой за период
 [X] 7.8  View 3: Отчет о продажах
 
-[ ] 8. Director tables (filtration and reports)
+[X] 8. Director tables (filtration and reports)
 [X] 8.1  - Управление списком заказов
     - DirectorOrdersController            director_orders
     - | Partner firmname | product | price | quantity | Status
@@ -30,7 +30,7 @@
     - Сортировка по всем полям
     - Фильтрация по имени/продукту и статусу
     - Генерация отчетов
-[ ] 8.2  - Управление филиалами
+[x] 8.2  - Управление филиалами
     - DirectorAffiliatesController        director_affiliates
 
     - | Affiliate address | contact number | Revenue | Manager |
@@ -38,10 +38,10 @@
     - Вывод информации о филиале + Имя и номер менеджера + Чистая Выручка за период
     - Добавление филиала/управление сотрудником на должности
     - Генерация отчетов
-[ ] 8.3  - Добавление продукции
+[X] 8.3  - Добавление продукции
 - DirectorProductionController        director_production
     - |Product name|production cost|
-[ ] 8.4  - Отчет о продажах
+[X] 8.4  - Отчет о продажах
 - DirectorProductionReportController  director_production_report
 
     - | Product name | Date | Sells Revenue | Orders Revenue |  Producted count | Production Cost | Sold in affiliates | Sold to partners | Sold count | Realisation index |  Net revenue | 
@@ -50,8 +50,8 @@
     - Сортировка по всем полям
     - Флаг summary - удаляет Date для общего обзора периода
     - генерация отчетов
-[ ] 9. Пользователь:
-[ ] 9.1  Просмотр списка продукции
+[X] 9. Пользователь:
+[X] 9.1  Просмотр списка продукции
     - | Product | Price | quantity | 
     - Read only
     - Фильтрация по продукту

@@ -1,0 +1,50 @@
+  (function() {
+  $(document).ready(function() {
+    $('#dynamic-table').bootstrapTable({
+      locale: 'ru-RU',
+      search: true,
+      pagination: true,
+      pageList: [10, 25, 50, 100, "All"],
+      sidePagination: 'server',
+      columns: [
+        {
+          field: 'product',
+          title: 'Наименование',
+          sortable: true,
+        },
+        {
+          field: 'quantity',
+          title: 'Количество на складе',
+          sortable: true,
+        },
+        {
+          field: 'price',
+          title: 'Стоимость',
+          sortable: true,
+        },
+      ],
+
+      url: `{{ path('api_user_products_list') }}`,
+      method: 'GET',
+      contentType: 'application/json',
+
+      showFooter: true, 
+      showColumns: true,
+      showRefresh: true,
+      showToggle: true,
+      showFullscreen: true,
+
+      responseHandler: function(res) {
+        return {
+          total: res.totalElements,
+          rows: res.content
+        };
+      },
+
+      onLoadError: function(status, jqXHR) {
+        console.error('Error loading data:', status, jqXHR);
+        alert('Error loading data. Please try again.');
+      }
+    });
+  });
+})();

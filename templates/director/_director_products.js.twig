@@ -1,0 +1,211 @@
+  (function() {
+  const penIcon = `<i class="bi bi-pencil"></i>`;
+  const trashIcon = `<i class="bi bi-trash"></i>`;
+  const editIcon = `<i class="bi bi-pencil-square"></i>`;
+
+  function editableFormatter(value, row, index, field) {
+    return `<span class="editable-span" data-field="${field}" style="cursor:pointer;">${value}${penIcon}</span>`;
+  }
+
+  function actionFormatter(value, row, index) {
+    return `
+      <button type="button" class="btn btn-sm btn-outline-primary edit-row" data-id="${row.id}" title="Редактировать">${editIcon}</button>
+      <button type="button" class="btn btn-sm btn-outline-danger delete-row" data-id="${row.id}" title="Удалить">${trashIcon}</button>
+    `;
+  }
+
+  $(document).ready(function() {
+    $('#dynamic-table').bootstrapTable({
+      search: true,
+      pagination: true,
+      pageList: [10, 25, 50, 100, "All"],
+      sidePagination: 'server',
+      columns: [
+        {
+          field: 'id',
+          title: 'ID',
+          visible: false,
+          sortable: true,
+        },
+        {
+          field: 'name',
+          title: 'Наименование',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'name');
+          }
+        },
+        {
+          field: 'quantity_storaged',
+          title: 'Количество на складе',
+          sortable: true,
+        },
+        {
+          field: 'production_cost',
+          title: 'Стоимость продукции',
+          sortable: true,
+          formatter: function(value, row, index) {
+            return editableFormatter(value, row, index, 'production_cost');
+          }
+        },
+        
+        {
+          field: 'actions',
+          title: 'Действия',
+          align: 'center',
+          clickToSelect: false,
+          formatter: actionFormatter
+        }
+      ],
+
+      url: `{{ path('api_director_production_list') }}`,
+      method: 'GET',
+      contentType: 'application/json',
+
+      showFooter: true, 
+      showColumns: true,
+      showRefresh: true,
+      showToggle: true,
+      showFullscreen: true,
+
+      responseHandler: function(res) {
+        return {
+          total: res.totalElements,
+          rows: res.content
+        };
+      },
+
+      onLoadError: function(status, jqXHR) {
+        console.error('Error loading data:', status, jqXHR);
+        alert('Error loading data. Please try again.');
+      }
+    });
+
+    // Кнопка "Добавить товар"
+    const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+    $('#add-item-btn').on('click', function() {
+      $('#itemModalLabel').text('Добавить товар');
+      $('#item-id').val('');
+      $('#item-name').val('');
+      $('#item-cost').val('');
+      itemModal.show();
+    });
+
+    // Кнопка "Редактировать" (в модальном)
+    $(document).on('click', '.edit-row', function() {
+      const productId = $(this).data('id');
+      const row = $('#dynamic-table').bootstrapTable('getData').find(r => r.id == productId);
+      if (!row) return;
+      $('#itemModalLabel').text('Редактировать товар');
+      $('#item-id').val(row.id);
+      $('#item-name').val(row.name);
+      $('#item-cost').val(row.production_cost);
+      itemModal.show();
+    });
+
+    // Сохранить (добавить или обновить)
+    $('#item-form').on('submit', function(e) {
+      e.preventDefault();
+      const id = $('#item-id').val();
+      const data = {
+        name: $('#item-name').val(),
+        quantity_storaged: $('#item-quantity').val(),
+        production_cost: $('#item-cost').val()
+      };
+      let url, type;
+      if (id) {
+        url = `{{ path('api_director_production_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', id);
+        type = 'PUT';
+      } else {
+        url = `{{ path('api_director_production_create') }}`;
+        type = 'POST';
+      }
+      $.ajax({
+        url: url,
+        type: type,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+          itemModal.hide();
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при сохранении!');
+        }
+      });
+    });
+
+    // Удаление строки
+    $(document).on('click', '.delete-row', function() {
+      if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
+      const productId = $(this).data('id');
+      const url = `{{ path('api_director_production_delete', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
+
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при удалении!');
+        }
+      });
+    });
+
+    // Оставляем инлайн-редактирование, если нужно
+    $(document).on('click', '.editable-span', function() {
+      const $span = $(this);
+      const value = $span.text().replace(/[\u{1F58A}-\u{1F58C}]|<svg[\s\S]*?<\/svg>/gu, '').trim();
+      const field = $span.data('field');
+      let inputType = 'text';
+      let step = '';
+      if (field === 'quantity_storaged' || field === 'production_cost') {
+        inputType = 'number';
+        step = 'step="0.01"';
+      }
+      $span.replaceWith(
+        `<input type="${inputType}" class="form-control editable-input" data-field="${field}" value="${value}" ${step} style="width: 100%; display:inline;">`
+      );
+      $('.editable-input').focus();
+    });
+
+    $(document).on('blur', '.editable-input', function() {
+      saveEdit($(this));
+    });
+    $(document).on('keydown', '.editable-input', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $(this).blur();
+      }
+    });
+
+    function saveEdit($input) {
+      const newValue = $input.val();
+      const field = $input.data('field');
+      const $tr = $input.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+      const productId = rowData.id;
+      const url = `{{ path('api_director_production_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
+
+      let data = {};
+      data[field] = newValue;
+
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+          $('#dynamic-table').bootstrapTable('refresh');
+        },
+        error: function(xhr) {
+          alert('Ошибка при обновлении!');
+        }
+      });
+
+      $input.replaceWith(editableFormatter(newValue, rowData, rowIndex, field));
+    }
+  });
+})();

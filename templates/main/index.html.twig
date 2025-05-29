@@ -35,10 +35,10 @@
             {% if is_granted('ROLE_USER') %}
                 <div class="nav-section">
                     <div class="nav-section-title">Общее</div>
-                    <a href="/user/{{ app.user.id }}/edit" class="nav-link">
+                    {# <a href="/user/{{ app.user.id }}/edit" class="nav-link">
                         <i class="fas fa-user"></i>
                         <span>Профиль</span>
-                    </a>
+                    </a> #}
                     <a href="/logout" class="nav-link">
                         <i class="fas fa-home"></i>
                         <span>Выйти</span>
@@ -46,7 +46,7 @@
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Пользователь</div>
-                    <a href="#" class="nav-link dynamic-table" data-table="user_view_products">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'user_table_products' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Продукты</span>
                     </a>
@@ -68,7 +68,7 @@
             {% if is_granted('ROLE_ADMIN') %}
                 <div class="nav-section">
                     <div class="nav-section-title">Админ-панель</div>
-                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_affiliates">
+                    {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_affiliates">
                         <i class="bi bi-building-fill"></i>
                         <span>Филиалы</span>
                     </a>
@@ -79,7 +79,7 @@
                     <a href="#" class="nav-link dynamic-table" data-table="admin_view_product_movement">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Движение продукции</span>
-                    </a>
+                    </a> #}
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_products' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Продукты</span>
@@ -88,26 +88,26 @@
                         <i class="fas fa-shopping-cart"></i>
                         <span>Ингредиенты</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_products_recipies">
+                    {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_products_recipies">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Рецепты</span>
                     </a>
                     <a href="#" class="nav-link dynamic-table" data-table="admin_view_deliveries">
                         <i class="bi bi-box2-fill"></i>
                         <span>Поставки</span>
-                    </a>
+                    </a> #}
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_suppliers' )}}">
                         <i class="bi bi-boxes"></i>
                         <span>Поставщики</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="admin_view_production_plan">
+                    {# <a href="#" class="nav-link dynamic-table" data-table="admin_view_production_plan">
                         <i class="bi bi-calendar-week"></i>
                         <span>Производственный план</span>
                     </a>
                     <a href="#" class="nav-link dynamic-table" data-table="admin_view_orders">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Заказы</span>
-                    </a>
+                    </a> #}
                     <a href="#" class="nav-link dynamic-table" table-url="{{path( 'admin_table_partners' )}}">
                         <i class="bi bi-briefcase"></i>
                         <span>Партнеры</span>
@@ -120,19 +120,19 @@
             {% elseif is_granted('ROLE_DIRECTOR') %}
                 <div class="nav-section">
                     <div class="nav-section-title ">Директор</div>
-                    <a href="#" class="nav-link dynamic-table" data-table="director_order_list">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_orders' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Управление заказами</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="director_affiliates">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_affiliates_finance' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Управление филиалами</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="director_production">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_products' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Добавление продукции</span>
                     </a>
-                    <a href="#" class="nav-link dynamic-table" data-table="director_production_report">
+                    <a href="#" class="nav-link dynamic-table" table-url="{{path( 'director_table_production_report' )}}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Отчет о продажах</span>
                     </a>
@@ -144,7 +144,7 @@
 
     <main class="main-content" id="mainContent">
         <div class="container">
-            <h1>Добро пожаловать в "Колесо самсары"!</h1>
+            <h1 id="tableHeader">Добро пожаловать в "Колесо самсары"!</h1>
             <div id="tableContainer">
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
@@ -157,14 +157,14 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tableContainer = document.getElementById('tableContainer');
-        
+        const tableHeader = document.getElementById('tableHeader');
+
         // Handle nav-section link selection
         document.querySelectorAll('.dynamic-table').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const tableUrl = this.getAttribute('table-url');
                 
-                // Show loading state
                 tableContainer.innerHTML = `
                     <div class="d-flex justify-content-center">
                         <div class="spinner-border text-primary" role="status">
@@ -173,11 +173,10 @@
                     </div>
                 `;
                 
-                // Load table content
                 fetch(`${tableUrl}`)
                     .then(response => response.text())
                     .then(html => {
-                        insertHtmlAndScripts(tableContainer, html)
+                        insertHtmlAndScripts(tableContainer, tableHeader, html)
                     })
                     .catch(error => {
                         console.error('Error loading table:', error);
