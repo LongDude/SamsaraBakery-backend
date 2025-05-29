@@ -40,4 +40,18 @@ class DirectorViewController extends AbstractController
         $response->headers->set('Content-Type', 'application/javascript');
         return $response;
     }
+
+    #[Route('/production_report', name: 'production_report')]
+    public function directorViewProductionReport(): Response
+    {
+        return $this->render('director/_director_production_report.html.twig', []);
+    }
+
+    #[Route('/production_report/js', name: 'production_report_js')]
+    public function directorViewProductionReportJs(): Response
+    {
+        $response = $this->render('director/_director_production_report.js.twig', []);
+        $response->headers->set('Content-Type', 'application/javascript');
+        return $response;
+    }
 }

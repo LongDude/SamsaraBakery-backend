@@ -77,6 +77,7 @@ final class Version20250528183404 extends AbstractMigration
         $this->addSql(<<<'SQL'
             CREATE OR REPLACE VIEW director_production_report_view AS
             SELECT
+                row_number() OVER (ORDER BY p.name, COALESCE(pm.date, o.date)) AS id,
                 p.name AS product_name,
                 COALESCE(pm.date, o.date) AS date,
                 COALESCE(SUM(pm.realised_price), 0) AS sells_revenue,
@@ -107,7 +108,7 @@ final class Version20250528183404 extends AbstractMigration
             FROM
                 products p
             LEFT JOIN products_movement pm ON pm.product_id = p.id
-            LEFT JOIN orders o ON o.product_id = p.id
+            RIGHT JOIN orders o ON o.product_id = p.id
             GROUP BY
                 p.name, COALESCE(pm.date, o.date);
         SQL);
@@ -116,6 +117,7 @@ final class Version20250528183404 extends AbstractMigration
         $this->addSql(<<<'SQL'
             CREATE OR REPLACE VIEW director_production_report_summary_view AS
             SELECT
+                row_number() OVER (ORDER BY product_name) AS id,
                 product_name,
                 SUM(sells_revenue) AS sells_revenue,
                 SUM(orders_revenue) AS orders_revenue,

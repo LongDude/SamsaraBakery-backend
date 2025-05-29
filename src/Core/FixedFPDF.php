@@ -69,50 +69,126 @@ class FixedFPDF extends FawnoFPDF
 
         // 2. Выводим заголовки
         $pdf->SetFont($fontname, 'B', $headerFontSize);
+        $headerCellHeights = [];
+        $headerCellTexts = [];
         foreach ($headers as $i => $header) {
-            $pdf->Cell($colWidths[$i], $cellHeight+4, self::toWin1251($header), 1, 0, 'C');
+            $txt = self::toWin1251($header);
+            $lines = $pdf->NbLines($colWidths[$i], $txt);
+            $headerCellHeights[$i] = $lines * ($cellHeight + 2); // +2 для чуть большего межстрочного интервала
+            $headerCellTexts[$i] = $txt;
         }
-        $pdf->Ln();
+        $headerRowHeight = max($headerCellHeights);
+
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+        for ($i = 0; $i < count($headers); $i++) {
+            $curX = $pdf->GetX();
+            $curY = $pdf->GetY();
+            $pdf->MultiCell($colWidths[$i], $cellHeight + 2, $headerCellTexts[$i], 'LTR', 'C', false);
+            $cellH = $headerCellHeights[$i];
+            if ($cellH < $headerRowHeight) {
+                $pdf->SetXY($curX, $curY + $cellH);
+                $pdf->Cell($colWidths[$i], $headerRowHeight - $cellH, '', 'LR', 0, 'C', false);
+            }
+            $pdf->SetXY($curX + $colWidths[$i], $curY);
+        }
+        // Нарисовать нижнюю границу всей строки заголовка
+        $pdf->SetXY($x, $y + $headerRowHeight);
+        $pdf->Cell(array_sum($colWidths), 0, '', 'T');
+        $pdf->SetX($pdf->lMargin);
 
         // 3. Выводим строки с переносом (MultiCell)
         $pdf->SetFont($fontname, '', $cellFontSize);
         foreach ($data as $row) {
-            $x = $pdf->GetX();
-            $y = $pdf->GetY();
-
-            $cellHeights = [];
-            $cellTexts = [];
-            // 1. Считаем высоту каждой ячейки (сколько строк займет)
-            foreach ($fields as $i => $field) {
-                $value = $row[$field] ?? '';
-                if ($valueFormatter) {
-                    $value = $valueFormatter($value, $field, $row);
+            $repeatRow = true;
+            $repeatCount = 0;
+            while ($repeatRow) {
+                $repeatRow = false;
+                $repeatCount++;
+                if ($repeatCount > 2) {
+                    break;
                 }
-                $txt = self::toWin1251((string)$value);
-                $lines = $pdf->NbLines($colWidths[$i], $txt);
-                $cellHeights[$i] = $lines * $cellHeight;
-                $cellTexts[$i] = $txt;
-            }
-            $rowHeight = max($cellHeights);
 
-            // 2. Выводим ячейки с только боковыми границами
-            for ($i = 0; $i < count($fields); $i++) {
-                $curX = $pdf->GetX();
-                $curY = $pdf->GetY();
-                $pdf->MultiCell($colWidths[$i], $cellHeight, $cellTexts[$i], 'LR', 'L', false);
-                $cellH = $cellHeights[$i];
-                if ($cellH < $rowHeight) {
-                    $pdf->SetXY($curX, $curY + $cellH);
-                    $pdf->Cell($colWidths[$i], $rowHeight - $cellH, '', 'LR', 0, 'L', false);
+                $x = $pdf->GetX();
+                $y = $pdf->GetY();
+                $pageBefore = $pdf->PageNo();
+
+                $cellHeights = [];
+                $cellTexts = [];
+                foreach ($fields as $i => $field) {
+                    $value = $row[$field] ?? '';
+                    if ($valueFormatter) {
+                        $value = $valueFormatter($value, $field, $row);
+                    }
+                    $txt = self::toWin1251((string)$value);
+                    $lines = $pdf->NbLines($colWidths[$i], $txt);
+                    $cellHeights[$i] = $lines * $cellHeight;
+                    $cellTexts[$i] = $txt;
                 }
-                $pdf->SetXY($curX + $colWidths[$i], $curY);
-            }
-            // 3. После строки рисуем нижнюю границу по всей ширине ряда
-            $pdf->SetXY($x, $y + $rowHeight);
-            $pdf->Cell(array_sum($colWidths), 0, '', 'T');
+                $rowHeight = max($cellHeights);
 
-            // Сброс X на левый отступ страницы
-            $pdf->SetX($pdf->lMargin);
+                // Проверяем, помещается ли строка на страницу
+                $bottomY = $pdf->GetY() + $rowHeight;
+                $pageHeight = $pdf->h - $pdf->bMargin;
+                if ($bottomY > $pageHeight) {
+                    $pdf->AddPage("L");
+                    $pdf->SetFont($fontname, 'B', $headerFontSize);
+                    $headerCellHeights = [];
+                    $headerCellTexts = [];
+                    foreach ($headers as $i => $header) {
+                        $txt = self::toWin1251($header);
+                        $lines = $pdf->NbLines($colWidths[$i], $txt);
+                        $headerCellHeights[$i] = $lines * ($cellHeight + 2); // +2 для чуть большего межстрочного интервала
+                        $headerCellTexts[$i] = $txt;
+                    }
+                    $headerRowHeight = max($headerCellHeights);
+
+                    $x = $pdf->GetX();
+                    $y = $pdf->GetY();
+                    for ($i = 0; $i < count($headers); $i++) {
+                        $curX = $pdf->GetX();
+                        $curY = $pdf->GetY();
+                        $pdf->MultiCell($colWidths[$i], $cellHeight + 2, $headerCellTexts[$i], 'LTR', 'C', false);
+                        $cellH = $headerCellHeights[$i];
+                        if ($cellH < $headerRowHeight) {
+                            $pdf->SetXY($curX, $curY + $cellH);
+                            $pdf->Cell($colWidths[$i], $headerRowHeight - $cellH, '', 'LR', 0, 'C', false);
+                        }
+                        $pdf->SetXY($curX + $colWidths[$i], $curY);
+                    }
+                    // Нарисовать нижнюю границу всей строки заголовка
+                    $pdf->SetXY($x, $y + $headerRowHeight);
+                    $pdf->Cell(array_sum($colWidths), 0, '', 'T');
+                    $pdf->SetX($pdf->lMargin);
+
+                    $pdf->SetFont($fontname, '', $cellFontSize);
+                    continue;
+                }
+
+                for ($i = 0; $i < count($fields); $i++) {
+                    $curX = $pdf->GetX();
+                    $curY = $pdf->GetY();
+                    $pdf->MultiCell($colWidths[$i], $cellHeight, $cellTexts[$i], 'LR', 'L', false);
+                    $cellH = $cellHeights[$i];
+                    if ($cellH < $rowHeight) {
+                        $pdf->SetXY($curX, $curY + $cellH);
+                        $pdf->Cell($colWidths[$i], $rowHeight - $cellH, '', 'LR', 0, 'L', false);
+                    }
+                    $pdf->SetXY($curX + $colWidths[$i], $curY);
+
+                    if ($pdf->PageNo() != $pageBefore) {
+                        $pdf->SetX($pdf->lMargin);
+                        $repeatRow = true;
+                        break;
+                    }
+                }
+
+                if (!$repeatRow) {
+                    $pdf->SetXY($x, $y + $rowHeight);
+                    $pdf->Cell(array_sum($colWidths), 0, '', 'T');
+                    $pdf->SetX($pdf->lMargin);
+                }
+            }
         }
     }
 

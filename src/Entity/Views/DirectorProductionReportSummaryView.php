@@ -9,6 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 class DirectorProductionReportSummaryView
 {
     #[ORM\Id]
+    #[ORM\Column(type:"integer")]
+    private int $id;
+
     #[ORM\Column(type: "string", length: 128)]
     private string $product_name;
 
@@ -38,6 +41,11 @@ class DirectorProductionReportSummaryView
 
     #[ORM\Column(type: "float")]
     private float $net_revenue;
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
     public function getProductName(): string
     {

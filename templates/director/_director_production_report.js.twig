@@ -1,0 +1,186 @@
+
+  (function() {
+
+  let dateFromFilter = '';
+  let dateToFilter = '';
+
+  function getColumns(){
+    let columns = []
+    columns.push(
+      {
+        field: 'product_name',
+        title: 'Продукт',
+        sortable: true,
+      },
+    );
+    if (!$('#summary-checkbox').is(':checked')) {
+      columns.push(
+        {
+          field: 'date',
+        title: 'Дата <button type="button" class="btn btn-sm btn-outline-secondary ms-1 date-filter-btn" title="Фильтр"><i class="bi bi-funnel"></i></button>',
+          sortable: true,
+        },
+      );
+    }
+    columns.push(
+      {
+        field: 'sells_revenue',
+        title: 'Выручка от продаж',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'orders_revenue',
+        title: 'Выручка от заказов',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'production_cost',
+        title: 'Расходы на производство',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'producted_count',
+        title: 'Произведено',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'ordered_count',
+        title: 'Заказано',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'realisation_index',
+        title: 'Индекс реализации',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'order_index',
+        title: 'Индекс заказа',
+        sortable: true,
+      },
+    );
+    columns.push(
+      {
+        field: 'net_revenue',
+        title: 'Чистая прибыль',
+        sortable: true,
+      },
+    );
+    return columns;
+  }
+
+  function getOptions(){
+    return {
+      search: true,
+      pagination: true,
+      pageList: [10, 25, 50, 100, "All"],
+      sidePagination: 'server',
+      columns: getColumns(),
+
+      url: `{{ path('api_director_production_report_list') }}`,
+      method: 'GET',
+      contentType: 'application/json',
+
+      showFooter: true, 
+      showColumns: true,
+      showRefresh: true,
+      showToggle: true,
+      showFullscreen: true,
+
+      responseHandler: function(res) {
+        return {
+          total: res.totalElements,
+          rows: res.content
+        };
+      },
+
+      onLoadError: function(status, jqXHR) {
+        console.error('Error loading data:', status, jqXHR);
+        alert('Error loading data. Please try again.');
+      },
+
+      queryParams: function(params) {
+        params.date_from = dateFromFilter;
+        params.date_to = dateToFilter;
+        params.summary = $('#summary-checkbox').is(':checked');
+        return params;
+      }
+    }
+  }
+
+  $(document).ready(function() {
+    $('#dynamic-table').bootstrapTable(getOptions());
+
+
+    $(document).on('click', '.date-filter-btn', function() {
+      $('#dateFilterModal').modal('show');
+    });
+    $('#apply-date-filter-btn').on('click', function() {
+      // Здесь логика применения фильтра и обновления таблицы
+      // Например:
+      dateFromFilter = $('#date-from').val();
+      dateToFilter = $('#date-to').val();
+      $('#dateFilterModal').modal('hide');
+      $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+    });
+
+    // Кнопка фильтра по статусу
+    $(document).on('click', '.status-filter-btn', function() {
+      $('#statusFilterModal').modal('show');
+    });
+    $('#apply-status-filter-btn').on('click', function() {
+      statusFilter = $('#status-filter-select').val();
+      $('#statusFilterModal').modal('hide');
+      $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+    });
+
+    // Обработчик кнопки скачивания CSV-отчёта с учётом фильтров, поиска и сортировки
+    $('#download-excel-btn').on('click', function() {
+      // Получаем параметры фильтрации, поиска и сортировки
+      const tableOpts = $('#dynamic-table').bootstrapTable('getOptions');
+      const params = {
+        date_from: dateFromFilter,
+        date_to: dateToFilter,
+        summary: $('#summary-checkbox').is(':checked'),
+        search: tableOpts.searchText || '',
+        sort: tableOpts.sortName || '',
+        order: tableOpts.sortOrder || ''
+      };
+      const query = $.param(params);
+      window.open(`{{ path('api_director_production_report_report_excel') }}?${query}`, '_blank');
+    });
+
+    // Обработчик кнопки скачивания PDF-отчёта с учётом фильтров, поиска и сортировки
+    $('#download-pdf-btn').on('click', function() {
+      const tableOpts = $('#dynamic-table').bootstrapTable('getOptions');
+      const params = {
+        date_from: dateFromFilter,
+        date_to: dateToFilter,
+        summary: $('#summary-checkbox').is(':checked'),
+        search: tableOpts.searchText || '',
+        sort: tableOpts.sortName || '',
+        order: tableOpts.sortOrder || ''
+      };
+      const query = $.param(params);
+      window.open(`{{ path('api_director_production_report_report_pdf') }}?${query}`, '_blank');
+    });
+
+    $('#summary-checkbox').on('change', function() {
+      $('#dynamic-table').bootstrapTable('destroy');
+      $('#dynamic-table').bootstrapTable(getOptions());
+      $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+    });
+  });
+})();

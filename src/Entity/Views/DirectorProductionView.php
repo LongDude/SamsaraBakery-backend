@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: "director_production_view")]
 class DirectorProductionView
 {
-    #[ORM\Id]
     #[ORM\Column(type: "integer")]
     private int $product_id;
 
