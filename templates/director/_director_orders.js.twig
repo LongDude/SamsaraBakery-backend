@@ -207,6 +207,7 @@
     // Кнопка "Добавить товар"
     const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
     $('#add-item-btn').on('click', function() {
+      $('#itemModalLabel').text('Добавить заказ');
       selectedProductId = null;
       selectedPartnerId = null;
       $('#item-product_id').val('');
@@ -222,6 +223,7 @@
 
     // Кнопка "Редактировать" (в модальном)
     $(document).on('click', '.edit-row', function() {
+      $('#itemModalLabel').text('Редактировать заказ');
       const productId = $(this).data('id');
       const row = $('#dynamic-table').bootstrapTable('getData').find(r => r.order_id == productId);
       if (!row) return;
