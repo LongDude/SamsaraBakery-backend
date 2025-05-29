@@ -69,12 +69,14 @@
         <div class="modal-body">
           <input type="hidden" id="item-id">
           <div class="mb-3">
-            <label for="item-partner_firmname" class="form-label">Партнер</label>
-            <input type="text" class="form-control" id="item-partner_firmname" required>
+            <label for="item-partner" class="form-label">Партнер</label>
+            <input type="hidden" id="item-partner_id" name="partner_id">
+            <input type="text" class="form-control" id="item-partner" autocomplete="off" required>
           </div>
           <div class="mb-3">
             <label for="item-product" class="form-label">Продукт</label>
-            <input type="text" class="form-control" id="item-product" required>
+            <input type="hidden" id="item-product_id" name="product_id">
+            <input type="text" class="form-control" id="item-product" autocomplete="off" required>
           </div>
           <div class="mb-3">
             <label for="item-price" class="form-label">Цена</label>
@@ -92,10 +94,11 @@
               <option value="Order approved">Утверждено</option>
               <option value="Order closed">Закрыто</option>
             </select>
-        </div>
-        <div class="mb-3">
-        <label for="item-date" class="form-label">Дата</label>
-        <input type="date" class="form-control" id="item-date" required>
+          </div>
+          <div class="mb-3">
+            <label for="item-date" class="form-label">Дата</label>
+            <input type="date" class="form-control" id="item-date" required>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -106,10 +109,19 @@
   </div>
 </div>
 
+<style>
+.ui-autocomplete {
+  z-index: 99999 !important;
+  background: #fff;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+</style>
+
 
 
 
 </div>
 
-<h1 id="twigHeaderContainer">Заказы</h1>
 <script type="text/javascript" src="{{ path('director_table_orders_js') }}"></script>

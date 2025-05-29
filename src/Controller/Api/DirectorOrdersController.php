@@ -5,6 +5,8 @@ namespace App\Controller\Api;
 use App\Enum\OrderStatus;
 use App\Entity\Orders;
 use App\Entity\Products;
+use App\Repository\PartnersRepository;
+use App\Repository\ProductsRepository;
 use App\Repository\Views\DirectorOrdersViewRepository;
 use App\Services\DirectorOrdersViewReportService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -90,12 +92,12 @@ class DirectorOrdersController extends AbstractController
 
         $order = new Orders();
 
-        $order->setRecieverPartner($entityManager->getRepository(Partners::class)->find($data['partner_firmname']));
-        $order->setProduct($data['product']);
+        $order->setRecieverPartner($entityManager->getRepository(Partners::class)->find($data['partner_id']));
+        $order->setProduct($entityManager->getRepository(Products::class)->find($data['product_id']));
         $order->setPrice($data['price']);
         $order->setQuantity($data['quantity']);
-        $order->setStatus($data['status']);
-        $order->setDate($data['date']);
+        $order->setStatus(OrderStatus::from($data['status']));
+        $order->setDate(new \DateTime($data['date']));
 
         $entityManager->persist($order);
         $entityManager->flush();
@@ -116,11 +118,11 @@ class DirectorOrdersController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['partner_firmname'])) {
-            $order->setRecieverPartner($entityManager->getRepository(Partners::class)->findBy(['firmname' => $data['partner_firmname']])[0]);
+        if (isset($data['partner_id'])) {
+            $order->setRecieverPartner($entityManager->getRepository(Partners::class)->find($data['partner_id']));
         }   
-        if (isset($data['product'])) {
-            $order->setProduct($entityManager->getRepository(Products::class)->findOneBy(['name' => $data['product']]));
+        if (isset($data['product_id'])) {
+            $order->setProduct($entityManager->getRepository(Products::class)->find($data['product_id']));
         }
         if (isset($data['price'])) {
             $order->setPrice($data['price']);
@@ -132,7 +134,7 @@ class DirectorOrdersController extends AbstractController
             $order->setStatus(OrderStatus::from($data['status']));
         }
         if (isset($data['date'])) {
-            $order->setDate($data['date']);
+            $order->setDate(new \DateTime($data['date']));
         }
         $entityManager->flush();
 
@@ -257,5 +259,45 @@ class DirectorOrdersController extends AbstractController
 
         $pdfContent = DirectorOrdersViewReportService::generatePdf($data);
         return $pdfContent;
+    }
+
+    #[Route('/search/products', name: 'search_products', methods: ['GET'])]
+    public function searchProducts(Request $request, EntityManagerInterface $entityManager, ProductsRepository $productsRepository): JsonResponse
+    {
+        $search = $request->query->get('q', '');
+        $products = $productsRepository->createQueryBuilder('p')
+            ->where('p.name LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        $data = array_map(function($product) {
+            return [
+                'label' => $product->getName(),
+                'id' => $product->getId(),
+            ];
+        }, $products);
+        return $this->json($data);
+    }
+
+    #[Route('/search/partners', name: 'search_partners', methods: ['GET'])]
+    public function searchPartners(Request $request, EntityManagerInterface $entityManager, PartnersRepository $partnersRepository): JsonResponse
+    {
+        $search = $request->query->get('q', '');
+        $partners = $partnersRepository->createQueryBuilder('p')
+            ->where('p.firmname LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        $data = array_map(function($partner) {
+            return [
+                'label' => $partner->getFirmname(),
+                'id' => $partner->getId(),
+            ];
+        }, $partners);
+        return $this->json($data);
     }
 } 

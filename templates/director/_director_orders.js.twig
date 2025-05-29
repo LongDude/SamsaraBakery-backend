@@ -1,4 +1,4 @@
-  (function() {
+(function() {
   const penIcon = `<i class="bi bi-pencil"></i>`;
   const trashIcon = `<i class="bi bi-trash"></i>`;
   const editIcon = `<i class="bi bi-pencil-square"></i>`;
@@ -50,6 +50,57 @@
   let statusFilter = '';
   let dateFromFilter = '';
   let dateToFilter = '';
+
+  let selectedProductId = null;
+  let selectedPartnerId = null;
+
+  function initProductAutocomplete() {
+    $('#item-product').autocomplete({
+      minLength: 2,
+      source: function(request, response) {
+        $.ajax({
+          url: '{{ path('api_director_orders_search_products') }}',
+          data: { q: request.term },
+          success: function(data) {
+            response(data);
+          }
+        });
+      },
+      select: function(event, ui) {
+        selectedProductId = ui.item.id;
+        $('#item-product_id').val(ui.item.id);
+        $('#item-product').val(ui.item.label);
+        return false;
+      }
+    }).on('input', function() {
+      selectedProductId = null;
+      $('#item-product_id').val('');
+    });
+  }
+
+  function initPartnerAutocomplete() {
+    $('#item-partner').autocomplete({
+      minLength: 2,
+      source: function(request, response) {
+        $.ajax({
+          url: '{{ path('api_director_orders_search_partners') }}',
+          data: { q: request.term },
+          success: function(data) {
+            response(data);
+          }
+        });
+      },
+      select: function(event, ui) {
+        selectedPartnerId = ui.item.id;
+        $('#item-partner_id').val(ui.item.id);
+        $('#item-partner').val(ui.item.label);
+        return false;
+      }
+    }).on('input', function() {
+      selectedPartnerId = null;
+      $('#item-partner_id').val('');
+    });
+  }
 
   $(document).ready(function() {
     $('#dynamic-table').bootstrapTable({
@@ -156,10 +207,12 @@
     // Кнопка "Добавить товар"
     const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
     $('#add-item-btn').on('click', function() {
-      $('#itemModalLabel').text('Добавить заказ');
-      $('#item-id').val('');
-      $('#item-partner_firmname').val('');
+      selectedProductId = null;
+      selectedPartnerId = null;
+      $('#item-product_id').val('');
+      $('#item-partner_id').val('');
       $('#item-product').val('');
+      $('#item-partner').val('');
       $('#item-price').val('');
       $('#item-quantity').val('');
       $('#item-status').val('Order recieved'); // По умолчанию статус 'Принято'
@@ -174,7 +227,7 @@
       if (!row) return;
       $('#itemModalLabel').text('Редактировать заказ');
       $('#item-id').val(row.order_id);
-      $('#item-partner_firmname').val(row.partner_firmname);
+      $('#item-partner').val(row.partner_firmname);
       $('#item-product').val(row.product);
       $('#item-price').val(row.price);
       $('#item-quantity').val(row.quantity);
@@ -186,10 +239,14 @@
     // Сохранить (добавить или обновить)
     $('#item-form').on('submit', function(e) {
       e.preventDefault();
+      if (!selectedProductId || !selectedPartnerId) {
+        alert('Выберите продукт и партнер из списка!');
+        return false;
+      }
       const id = $('#item-id').val();
       const data = {
-        partner_firmname: $('#item-partner_firmname').val(),
-        product: $('#item-product').val(),
+        partner_id: $('#item-partner_id').val(),
+        product_id: $('#item-product_id').val(),
         price: $('#item-price').val(),
         quantity: $('#item-quantity').val(),
         status: $('#item-status').val(),
@@ -233,6 +290,200 @@
         error: function(xhr) {
           alert('Ошибка при удалении!');
         }
+      });
+    });
+
+    // Обработчик для инлайн-редактирования поля "product" с автодополнением
+    $(document).on('click', '.editable-span[data-field="product"]', function() {
+      const $span = $(this);
+      const value = $span.text().replace(/[ -\uFFFF]/g, '').trim() || $span.text().trim();
+      const $tr = $span.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+
+      const $input = $(`<input type="text" class="form-control editable-input-product" value="${value}" style="width: 100%; display:inline;">`);
+      $span.replaceWith($input);
+      $input.focus();
+
+      $input.autocomplete({
+        minLength: 2,
+        source: function(request, response) {
+          $.ajax({
+            url: '{{ path('api_director_orders_search_products') }}',
+            data: { q: request.term },
+            success: function(data) {
+              response(data);
+            }
+          });
+        },
+        select: function(event, ui) {
+          $input.data('selected-product-id', ui.item.id);
+          $input.val(ui.item.label);
+          $input.removeClass('is-invalid');
+          setTimeout(() => $input.blur(), 100);
+          return false;
+        },
+        response: function(event, ui) {
+          if (ui.content.length === 0) {
+            $input.addClass('is-invalid');
+          } else {
+            $input.removeClass('is-invalid');
+          }
+        }
+      });
+
+      $input.on('blur', function() {
+        const selectedId = $input.data('selected-product-id');
+        const currentVal = $input.val().trim();
+        if (!selectedId && currentVal !== '') {
+          $input.addClass('is-invalid');
+          setTimeout(() => {
+            $input.replaceWith(`<span class="editable-span" data-field="product" style="cursor:pointer;">${value}${penIcon}</span>`);
+          }, 200);
+          return;
+        }
+        if (!selectedId && currentVal === '') {
+          $input.replaceWith(`<span class="editable-span" data-field="product" style="cursor:pointer;">${value}${penIcon}</span>`);
+          return;
+        }
+        // Сохраняем на сервер
+        const productId = rowData.order_id;
+        const url = `{{ path('api_director_orders_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
+
+        $.ajax({
+          url: url,
+          type: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify({ product_id: selectedId }),
+          success: function(response) {
+            $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+          },
+          error: function(xhr) {
+            alert('Ошибка при обновлении!');
+          }
+        });
+
+        $input.replaceWith(`<span class="editable-span" data-field="product" style="cursor:pointer;">${$input.val()}${penIcon}</span>`);
+      });
+    });
+
+    // Для партнера
+    $(document).on('click', '.editable-span[data-field="partner_firmname"]', function() {
+      const $span = $(this);
+      const value = $span.text().replace(/[ -\uFFFF]/g, '').trim() || $span.text().trim();
+      const $tr = $span.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+
+      const $input = $(`<input type="text" class="form-control editable-input-partner" value="${value}" style="width: 100%; display:inline;">`);
+      $span.replaceWith($input);
+      $input.focus();
+
+      $input.autocomplete({
+        minLength: 2,
+        source: function(request, response) {
+          $.ajax({
+            url: '{{ path('api_director_orders_search_partners') }}',
+            data: { q: request.term },
+            success: function(data) {
+              response(data);
+            }
+          });
+        },
+        select: function(event, ui) {
+          $input.data('selected-partner-id', ui.item.id);
+          $input.val(ui.item.label);
+          $input.removeClass('is-invalid');
+          setTimeout(() => $input.blur(), 100);
+          return false;
+        },
+        response: function(event, ui) {
+          if (ui.content.length === 0) {
+            $input.addClass('is-invalid');
+          } else {
+            $input.removeClass('is-invalid');
+          }
+        }
+      });
+
+      $input.on('blur', function() {
+        const selectedId = $input.data('selected-partner-id');
+        const currentVal = $input.val().trim();
+        if (!selectedId && currentVal !== '') {
+          $input.addClass('is-invalid');
+          setTimeout(() => {
+            $input.replaceWith(`<span class="editable-span" data-field="partner_firmname" style="cursor:pointer;">${value}${penIcon}</span>`);
+          }, 200);
+          return;
+        }
+        if (!selectedId && currentVal === '') {
+          $input.replaceWith(`<span class="editable-span" data-field="partner_firmname" style="cursor:pointer;">${value}${penIcon}</span>`);
+          return;
+        }
+        // Сохраняем на сервер
+        const partnerId = rowData.order_id;
+        const url = `{{ path('api_director_orders_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', partnerId);
+
+        $.ajax({
+          url: url,
+          type: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify({ partner_id: selectedId }),
+          success: function(response) {
+            $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+          },
+          error: function(xhr) {
+            alert('Ошибка при обновлении!');
+          }
+        });
+
+        $input.replaceWith(`<span class="editable-span" data-field="partner_firmname" style="cursor:pointer;">${$input.val()}${penIcon}</span>`);
+      });
+    });
+
+    // Для даты
+    $(document).on('click', '.editable-span[data-field="date"]', function() {
+      const $span = $(this);
+      let value = $span.text().trim();
+      // Преобразуем dd-mm-yyyy в yyyy-mm-dd для input type="date"
+      let dateValue = value.split('-').reverse().join('-');
+      const $tr = $span.closest('tr');
+      const rowIndex = $tr.data('index');
+      const rowData = $('#dynamic-table').bootstrapTable('getData')[rowIndex];
+
+      const $input = $(`<input type="date" class="form-control editable-input-date" value="${dateValue}" style="width: 100%; display:inline;">`);
+      $span.replaceWith($input);
+      $input.focus();
+
+      $input.on('blur', function() {
+        const newDate = $input.val();
+        if (!newDate) {
+          $input.addClass('is-invalid');
+          setTimeout(() => {
+            $input.replaceWith(`<span class=\"editable-span\" data-field=\"date\" style=\"cursor:pointer;\">${value}${penIcon}</span>`);
+          }, 200);
+          return;
+        }
+        // Сохраняем на сервер
+        const productId = rowData.order_id;
+        const url = `{{ path('api_director_orders_update', {'id': 'PATTERN0'}) }}`.replace('PATTERN0', productId);
+
+        $.ajax({
+          url: url,
+          type: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify({ date: newDate }),
+          success: function(response) {
+            $('#dynamic-table').bootstrapTable('refresh', {pageNumber: 1});
+          },
+          error: function(xhr) {
+            alert('Ошибка при обновлении!');
+          }
+        });
+
+        // Преобразуем обратно в dd-mm-yyyy для отображения
+        const displayDate = newDate.split('-').reverse().join('-');
+        $input.replaceWith(`<span class=\"editable-span\" data-field=\"date\" style=\"cursor:pointer;\">${displayDate}${penIcon}</span>`);
       });
     });
 
@@ -378,6 +629,12 @@
       };
       const query = $.param(params);
       window.open(`{{ path('api_director_orders_report_pdf') }}?${query}`, '_blank');
+    });
+
+    // Инициализация при открытии модального окна
+    $('#itemModal').on('shown.bs.modal', function () {
+      initProductAutocomplete();
+      initPartnerAutocomplete();
     });
   });
 })();
